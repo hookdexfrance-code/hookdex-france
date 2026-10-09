@@ -5,37 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Politique de confidentialité — HookDex France</title>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #111; }
+  body { font-family: system-ui, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #111; background: #fff; }
   h1 { font-size: 22px; }
   h2 { font-size: 16px; margin-top: 28px; }
   p, li { font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 8px 0 4px; }
+  th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f4f4f4; }
+  .note { font-size: 13px; color: #555; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #111; color: #eee; }
+    th { background: #222; }
+    th, td { border-color: #333; }
+    .note { color: #aaa; }
+    a { color: #ff8a65; }
+  }
 </style>
 </head>
 <body>
 <h1>Politique de confidentialité — HookDex France</h1>
-<p><em>Dernière mise à jour : à compléter par vous-même avant publication.</em></p>
+<p><em>Dernière mise à jour : 9 octobre 2026 (version 5.5 de l'application).</em></p>
 
-<h2>Quelles données HookDex utilise-t-il ?</h2>
-<p>HookDex France est une application de carnet de pêche. Elle peut vous demander d'utiliser les données suivantes, uniquement avec votre action volontaire :</p>
+<h2>En bref</h2>
 <ul>
-  <li><strong>Position GPS</strong> : utilisée uniquement si vous appuyez sur « Utiliser ma position » lors de l'ajout d'une prise ou du lancement d'une sortie. Vous pouvez aussi saisir des coordonnées manuellement, ou ne rien renseigner du tout.</li>
-  <li><strong>Photos</strong> : uniquement celles que vous prenez ou sélectionnez vous-même pour illustrer une prise.</li>
-  <li><strong>Informations que vous saisissez</strong> : espèce, date, heure, taille, poids, météo, matériel utilisé, remarques, etc.</li>
+  <li>Ton carnet de pêche (prises, sorties, coins, photos, notes) est enregistré <strong>sur ton téléphone</strong>.</li>
+  <li>Le <strong>compte HookDex est facultatif</strong>. Sans compte, rien de ton carnet n'est envoyé à HookDex.</li>
+  <li>Avec un compte, <strong>rien n'est partagé sans ton accord</strong> : tu choisis, prise par prise et coin par coin, ce qui part en ligne et qui peut le voir : toi seul, tes amis ou tous les pêcheurs.</li>
+  <li>Ce que tu gardes <strong>privé</strong> n'est visible que de toi : ni les autres pêcheurs, ni les modérateurs, ni les admins de l'application ne le voient (sauf la photo d'une prise dont tu demandes toi-même la vérification).</li>
+  <li>Ton <strong>profil</strong> peut être public, réservé à tes amis ou privé : c'est le maximum pour tout ce que tu partages.</li>
 </ul>
 
-<h2>Où ces données sont-elles stockées ?</h2>
-<p>Toutes les données que vous saisissez dans HookDex (prises, sorties, photos, position GPS) sont stockées <strong>uniquement sur votre appareil</strong>, dans le stockage local de votre navigateur. Elles ne sont <strong>jamais envoyées à un serveur</strong>, à nous, ni à un tiers.</p>
+<h2>1. Données enregistrées sur ton téléphone</h2>
+<p>Espèce, date, heure, taille, poids, position GPS, photos, météo, matériel, leurres, remarques, sorties, coins de pêche et réglages sont stockés dans le stockage de ton navigateur (stockage local et IndexedDB). Tu peux les exporter (JSON ou CSV) ou les effacer à tout moment depuis les Paramètres. Désinstaller l'application ou effacer les données du navigateur les supprime.</p>
 
-<h2>Partage de données</h2>
-<p>HookDex ne collecte, ne transmet ni ne vend aucune donnée personnelle à des tiers. La seule situation où une donnée peut quitter l'application est lorsque <strong>vous</strong> choisissez volontairement d'ouvrir une position GPS dans Google Maps (ou une autre application de cartographie installée sur votre téléphone) : dans ce cas, les coordonnées sont transmises à cette application via une action que vous initiez explicitement.</p>
+<h2>2. Services en ligne utilisés par l'application</h2>
+<p>Ils ne sont contactés que lorsque tu utilises la fonction correspondante :</p>
+<ul>
+  <li><strong>Météo et mer</strong> (Open-Meteo) : la position est envoyée arrondie (environ 10 km pour la météo, environ 1 km pour la mer).</li>
+  <li><strong>Nom des communes</strong> (geo.api.gouv.fr, service public) : la position du lieu demandé est envoyée pour trouver la commune et le département (sur la carte des espèces : le centre de la zone touchée).</li>
+  <li><strong>Cartes</strong> (OpenStreetMap, IGN Géoplateforme) : les images de carte de la zone affichée sont téléchargées ; sur la carte des espèces, le dessin de l'eau (Plan IGN) de la zone affichée aussi.</li>
+  <li><strong>Statistiques de visite</strong> (GoatCounter) : un comptage anonyme des visites du site, sans cookie et sans donnée personnelle.</li>
+</ul>
 
-<h2>Fonctionnalités nécessitant une connexion internet</h2>
-<p>L'affichage de la carte interactive (fonds de carte OpenStreetMap) nécessite une connexion internet. Le reste de l'application fonctionne hors ligne.</p>
+<h2>3. Le compte HookDex (facultatif)</h2>
+<p>Si tu crées un compte, ces informations sont enregistrées sur le serveur HookDex (Supabase, serveurs situés dans l'Union européenne, en Allemagne) :</p>
+<ul>
+  <li>ton adresse e-mail et ton mot de passe (enregistré chiffré de façon irréversible par Supabase) ;</li>
+  <li>ton pseudo et ton rôle (pêcheur, modérateur ou admin) ;</li>
+  <li>ta photo de profil, si tu en mets une, et la visibilité de ton profil (public, amis, privé) ;</li>
+  <li>tes amis, les demandes d'ami envoyées et reçues, et les comptes que tu as bloqués ;</li>
+  <li>la date de création du compte et de ta dernière connexion.</li>
+</ul>
+<p>Pour la sécurité, Supabase conserve aussi pendant une durée limitée des journaux techniques de connexion (date, adresse IP).</p>
+<p>Ton <strong>profil</strong> (pseudo, photo de profil, rôle, date d'inscription, et chiffres calculés uniquement sur ce que la personne qui le regarde a le droit de voir : nombre de prises, espèces, j'aime reçus) dépend de la visibilité que tu choisis :</p>
+<ul>
+  <li><strong>Public</strong> (par défaut) : visible des utilisateurs connectés ;</li>
+  <li><strong>Amis uniquement</strong> : les autres ne voient que ton pseudo et ta photo de profil, et peuvent te demander en ami ;</li>
+  <li><strong>Privé</strong> : personne ne voit ton profil ni ce que tu partages, pas même tes amis, et on ne peut pas te trouver par la recherche.</li>
+</ul>
+<p>Ton adresse e-mail n'est jamais visible des autres pêcheurs ; seuls les admins de HookDex la voient, pour gérer les comptes.</p>
+<p><strong>E-mails</strong> : HookDex t'envoie seulement les e-mails nécessaires au compte (lien d'activation, lien pour choisir un nouveau mot de passe). Ils partent de l'adresse hookdex.france@gmail.com (service Gmail de Google) : ton adresse e-mail passe donc par Google le temps de l'envoi. Aucune publicité, aucune lettre d'information.</p>
 
-<h2>Suppression de vos données</h2>
-<p>Vous pouvez à tout moment exporter vos données (JSON ou CSV) ou les supprimer intégralement depuis les Paramètres de l'application. Désinstaller l'application ou vider les données du navigateur supprime également toutes les données stockées localement.</p>
+<h2>4. Ce que tu choisis de partager</h2>
+<p>Depuis ton journal ou tes coins, tu peux envoyer une prise ou un coin sur le serveur, en <strong>privé</strong> (toi seul), pour <strong>tes amis</strong> (les pêcheurs que tu as acceptés comme amis) ou en <strong>public</strong> (les utilisateurs connectés de HookDex). Si ton profil est réservé à tes amis, même ce qui est « public » n'est vu que d'eux ; s'il est privé, personne d'autre ne le voit.</p>
+<table>
+  <tr><th>Partagé</th><th>Ce qui part sur le serveur</th></tr>
+  <tr><td>Une prise</td><td>Espèce, date, heure, taille, poids, quantité, relâchée ou non, milieu (mer ou eau douce) ; si elle est publique et que tu le choisis : la position (point exact ou zone d'environ 3 km), la commune et le département.</td></tr>
+  <tr><td>Une photo de prise</td><td>La photo, réencodée sur ton téléphone avant l'envoi : les informations cachées dans le fichier (position GPS, modèle du téléphone, date) sont retirées.</td></tr>
+  <tr><td>Un coin</td><td>Le nom que tu choisis, le milieu, le type de coin, la profondeur, la position (point exact ou zone d'environ 3 km), la commune et le département. Un coin privé n'est pas envoyé.</td></tr>
+  <tr><td>Une photo de profil</td><td>La photo, recadrée en petit carré et réencodée sur ton téléphone avant l'envoi : les informations cachées dans le fichier (position GPS, modèle du téléphone, date) sont retirées. Elle est visible des utilisateurs connectés.</td></tr>
+  <tr><td>Un « j'aime »</td><td>Le fait que tu aimes une prise, et quand. Ceux qui peuvent voir la prise voient son nombre de « j'aime » et qui les a mis.</td></tr>
+  <tr><td>Une demande d'ami</td><td>Qui demande qui, et quand. Seules les deux personnes concernées la voient. Ta liste d'amis n'est visible que de toi.</td></tr>
+</table>
+<p><strong>Ne partent jamais</strong> : tes notes, ton matériel, tes leurres et appâts, ta technique, la météo enregistrée, tes sorties et leur trace GPS.</p>
+<p><strong>Zone d'environ 3 km</strong> : la position est arrondie sur ton téléphone avant l'envoi ; le serveur ne reçoit et ne garde que le centre de la zone. Une prise privée n'a jamais de position sur le serveur.</p>
+<p><strong>Carte des espèces</strong> : les prises publiques et vérifiées des profils publics y sont regroupées par zone d'environ 3 km (espèce, milieu, nombre de prises, plus grande taille, mois, date de la plus récente). La carte ne montre ni le point exact, ni le nom des pêcheurs. Une prise privée, réservée aux amis, masquée ou non vérifiée n'y apparaît pas.</p>
+<p><strong>Amis et blocage</strong> : une demande d'ami n'aboutit que si l'autre l'accepte. Tu peux retirer un ami, refuser ou annuler une demande, ou bloquer quelqu'un, sans que la personne soit prévenue. Bloquer quelqu'un retire votre amitié et vos « j'aime » croisés : vous ne voyez plus rien l'un de l'autre, et il ne peut plus te demander en ami.</p>
+<p>Tu peux à tout moment rendre privé ce qui était partagé, ou le retirer du serveur, et retirer ta photo de profil ou un « j'aime ». Supprimer une prise de ton carnet la retire aussi du serveur.</p>
 
-<h2>Contact</h2>
-<p>Pour toute question concernant cette politique de confidentialité : [votre adresse e-mail de contact à ajouter].</p>
+<h2>5. Vérification et modération</h2>
+<ul>
+  <li>Si tu demandes la <strong>vérification</strong> d'une prise, les modérateurs et les admins voient sa photo, l'espèce, la taille et la date pendant la vérification, même si elle est privée ; jamais sa position ni tes notes.</li>
+  <li>Un <strong>admin</strong> peut valider lui-même ses propres prises (avec photo) ; chaque validation est notée dans le journal de modération.</li>
+  <li>Tu peux <strong>signaler</strong> une prise ou un coin que tu peux voir, un pseudo ou une photo de profil. Les modérateurs voient le signalement et son auteur ; la personne signalée ne sait pas qui l'a signalée. Un modérateur ne voit une prise ou un coin réservé aux amis que s'il est signalé.</li>
+  <li>Les modérateurs peuvent masquer un contenu public (il redevient privé), remplacer un pseudo déplacé, retirer une photo de profil ou interdire d'en mettre une ; les admins peuvent supprimer un contenu. Ces actions sont notées dans un journal de modération.</li>
+</ul>
+
+<h2>6. Qui peut techniquement accéder au serveur</h2>
+<p>Les règles du serveur (sécurité au niveau des lignes, « RLS ») empêchent toute personne passant par l'application, admins compris, de lire ce qui est privé. Comme pour toute application en ligne, la personne qui administre le projet Supabase de HookDex peut techniquement accéder aux données stockées sur ce serveur ; elle ne le fait que pour la maintenance et la sécurité.</p>
+
+<h2>7. Durée de conservation et suppression</h2>
+<ul>
+  <li>Les données en ligne sont conservées tant que ton compte existe.</li>
+  <li><strong>Supprimer ton compte</strong> (Paramètres → Mon compte → Supprimer mon compte) efface ton e-mail, ton pseudo, ta photo de profil, tes prises, tes coins, tes photos, tes « j'aime », tes amis, tes demandes d'ami et tes blocages du serveur. Ton carnet sur le téléphone n'est pas touché.</li>
+  <li>Les journaux de modération et de changement de rôle, ainsi que les signalements, sont conservés pour garder la trace des décisions ; ils ne contiennent pas ton e-mail.</li>
+</ul>
+
+<h2>8. Tes droits</h2>
+<p>Conformément au RGPD, tu peux accéder à tes données, les corriger, les exporter ou les faire supprimer. La plupart se font directement dans l'application (export du carnet, changement de pseudo, rendre privé, suppression du compte). Si tu as moins de 15 ans, demande l'accord d'un parent avant de créer un compte.</p>
+
+<h2>9. Contact</h2>
+<p>Pour toute question sur cette politique ou sur tes données : <strong>hookdex.france@gmail.com</strong>.</p>
+<p class="note">Hébergement du site : GitHub Pages. Serveur des comptes et du partage : Supabase (Union européenne).</p>
 </body>
 </html>
