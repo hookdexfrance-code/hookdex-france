@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B1117">
+<title>HookDex · essai de reconnaissance</title>
+<style>
+/* Page d'essai de la reconnaissance par photo (admin seulement) : une colonne, une carte par étape, les résultats
+   de chaque modèle empilés, puis le bilan. Mêmes couleurs que HookDex. */
+:root {
+  --bg: #0B1117; --carte: #13202B; --carte2: #182837; --ligne: #24394E; --texte: #E8EEF5; --doux: #9FB3C2;
+  --accent: #FF6B3D; --accent-texte: #1A0D05; --ok: #2BB673; --ok-doux: #12291F; --non: #E5484D; --non-doux: #2E1716;
+  --r: 14px; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--bg); color: var(--texte); }
+body { font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+main { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
+h1 { font-size: 22px; margin: 4px 0 0; line-height: 1.2; }
+h2 { font-size: 17px; margin: 0; }
+p { margin: 0; }
+.doux { color: var(--doux); font-size: 14px; }
+.carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.etat { display: flex; gap: 10px; align-items: flex-start; }
+.etat b { font-size: 20px; line-height: 1.2; }
+.bouton { appearance: none; border: 1px solid var(--ligne); background: var(--carte2); color: var(--texte); font: inherit; font-weight: 700; border-radius: 12px; min-height: 48px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+.bouton.principal { background: var(--accent); border-color: var(--accent); color: var(--accent-texte); }
+.bouton:disabled { opacity: 0.45; cursor: default; }
+.bouton.plein { width: 100%; }
+.rangee { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.choix { display: grid; gap: 6px; }
+.choix label { display: flex; align-items: center; gap: 10px; background: var(--carte2); border: 1px solid var(--ligne); border-radius: 12px; padding: 10px 12px; cursor: pointer; min-height: 48px; }
+.choix input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; flex: none; }
+.choix label:has(input:checked) { border-color: var(--accent); }
+.choix small { display: block; color: var(--doux); font-size: 13px; }
+#apercu { width: 100%; max-height: 340px; object-fit: contain; border-radius: 12px; background: #000; display: block; }
+input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.resultat { background: var(--carte2); border: 1px solid var(--ligne); border-radius: 12px; padding: 12px; display: grid; gap: 8px; }
+.resultat.bon { border-color: var(--ok); }
+.resultat.faux { border-color: var(--non); }
+.entete-res { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.entete-res b { font-size: 15px; }
+.sug { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
+.sug .nom { font-weight: 700; min-width: 0; }
+.sug .sci { grid-column: 1 / -1; color: var(--doux); font-size: 13px; font-style: italic; margin-top: -2px; }
+.barre { grid-column: 1 / -1; height: 6px; border-radius: 99px; background: var(--ligne); overflow: hidden; }
+.barre i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+.pct { font-variant-numeric: tabular-nums; font-weight: 700; }
+.verdict { font-size: 14px; font-weight: 700; }
+.verdict.bon { color: var(--ok); }
+.verdict.faux { color: var(--non); }
+.erreur { color: #FF9585; font-size: 14px; }
+.photo-bloc { display: grid; gap: 10px; border-top: 1px dashed var(--ligne); padding-top: 12px; }
+.photo-bloc img { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; }
+.photo-tete { display: flex; gap: 10px; align-items: center; }
+select, input[type=search] { width: 100%; font: inherit; color: var(--texte); background: var(--carte2); border: 1px solid var(--ligne); border-radius: 10px; min-height: 44px; padding: 8px 10px; }
+.bilan-liste { display: grid; gap: 8px; }
+.ligne-bilan { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; background: var(--carte2); border: 1px solid var(--ligne); border-radius: 12px; padding: 10px 12px; }
+.ligne-bilan > div:first-child { grid-column: 1 / -1; }
+.ligne-bilan small { display: block; color: var(--doux); font-size: 13px; }
+.stat b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.attente { display: inline-block; width: 16px; height: 16px; border: 3px solid var(--doux); border-top-color: transparent; border-radius: 50%; animation: tourne 0.8s linear infinite; vertical-align: -3px; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .attente { animation: none; } }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--texte); color: var(--bg); font-weight: 700; padding: 10px 16px; border-radius: 99px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); text-align: center; }
+.toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="doux">HookDex France · page d'essai pour l'admin</p>
+    <h1>Reconnaître un poisson sur une photo</h1>
+    <p class="doux">Pas encore dans l'appli : on compare ici plusieurs modèles d'IA de Cloudflare sur tes vraies photos, avant de choisir.</p>
+  </header>
+
+  <section class="carte" aria-labelledby="t-compte">
+    <h2 id="t-compte">Ton compte</h2>
+    <div class="etat" id="compte"><b>…</b><p>Vérification…</p></div>
+  </section>
+
+  <section class="carte" aria-labelledby="t-photo">
+    <h2 id="t-photo">1. La photo</h2>
+    <label class="bouton principal plein" for="fichier">📷 Prendre ou choisir une photo</label>
+    <input type="file" id="fichier" accept="image/*">
+    <img id="apercu" alt="La photo choisie" hidden>
+    <p class="doux" id="infos-photo">La photo est réduite (1024 pixels au plus) avant l'envoi.</p>
+  </section>
+
+  <section class="carte" aria-labelledby="t-milieu">
+    <h2 id="t-milieu">2. Où a-t-elle été pêchée ?</h2>
+    <div class="choix" role="radiogroup" aria-labelledby="t-milieu">
+      <label><input type="radio" name="milieu" value="med" checked> Mer · Méditerranée</label>
+      <label><input type="radio" name="milieu" value="atl"> Mer · Atlantique ou Manche</label>
+      <label><input type="radio" name="milieu" value="douce"> Eau douce (rivière, lac, étang)</label>
+      <label><input type="radio" name="milieu" value="tout"> Je ne sais pas</label>
+    </div>
+    <p class="doux" id="nb-candidats"></p>
+  </section>
+
+  <section class="carte" aria-labelledby="t-modele">
+    <h2 id="t-modele">3. Le modèle d'IA</h2>
+    <div class="choix" role="radiogroup" aria-labelledby="t-modele" id="modeles"></div>
+    <div class="choix"><label><input type="checkbox" id="reflexion"> <span>Réfléchir avant de répondre<small>Plus lent et plus cher (Mistral ne sait pas le faire)</small></span></label></div>
+    <div class="rangee">
+      <button class="bouton principal" type="button" id="lancer" disabled>Reconnaître</button>
+      <button class="bouton" type="button" id="comparer" disabled>Comparer les 4</button>
+    </div>
+  </section>
+
+  <section class="carte" aria-labelledby="t-res" id="zone-res" hidden>
+    <h2 id="t-res">Résultats</h2>
+    <div id="resultats" style="display:grid;gap:12px"></div>
+  </section>
+
+  <section class="carte" aria-labelledby="t-bilan">
+    <h2 id="t-bilan">Bilan</h2>
+    <p class="doux">Après chaque photo, indique l'espèce qu'elle montrait vraiment : le bilan compte les bonnes réponses de chaque modèle.</p>
+    <div class="bilan-liste" id="bilan"></div>
+    <div class="rangee">
+      <button class="bouton" type="button" id="copier">Copier le bilan</button>
+      <button class="bouton" type="button" id="effacer">Effacer le bilan</button>
+    </div>
+  </section>
+
+  <p class="doux">Les photos sont envoyées à Cloudflare pour l'analyse : Cloudflare ne les garde pas et ne s'en sert pas pour entraîner ses modèles. Rien n'est enregistré dans HookDex.</p>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+const SERVEUR = { url: "https://kxxpylxtfjuesszqvijl.supabase.co", cle: "sb_publishable_9ITHSth0tqaWIYNGxDxYMg_mLTPOzyA" };
+const FONCTION = SERVEUR.url + "/functions/v1/hookdex-reco";
+const SESSION = "fdx_auth";            // la session de HookDex (même site : on la partage)
+const BILAN = "fdx_essai_reco_v1";     // le bilan des essais, gardé sur ce téléphone
+const ESPECES = [{"id":"brochet","nom":"Brochet","sci":"Esox lucius","cat":"riviere"},{"id":"brochet_albinos","nom":"Brochet albinos","sci":"Esox lucius (var.)","cat":"riviere"},{"id":"sandre","nom":"Sandre","sci":"Sander lucioperca","cat":"riviere"},{"id":"perche","nom":"Perche","sci":"Perca fluviatilis","cat":"riviere"},{"id":"truite_fario","nom":"Truite fario","sci":"Salmo trutta fario","cat":"riviere"},{"id":"truite_fario_albinos","nom":"Truite fario albinos","sci":"Salmo trutta fario (var.)","cat":"riviere"},{"id":"truite_corse","nom":"Truite de Corse","sci":"Salmo trutta macrostigma","cat":"riviere"},{"id":"truite_arc_en_ciel","nom":"Truite arc-en-ciel","sci":"Oncorhynchus mykiss","cat":"riviere"},{"id":"black_bass","nom":"Black-bass","sci":"Micropterus salmoides","cat":"riviere"},{"id":"black_bass_petite_bouche","nom":"Black-bass à petite bouche","sci":"Micropterus dolomieu","cat":"riviere"},{"id":"silure","nom":"Silure glane","sci":"Silurus glanis","cat":"riviere"},{"id":"silure_albinos","nom":"Silure albinos","sci":"Silurus glanis (var.)","cat":"riviere"},{"id":"carpe_commune","nom":"Carpe commune","sci":"Cyprinus carpio","cat":"riviere"},{"id":"carpe_commune_albinos","nom":"Carpe commune albinos","sci":"Cyprinus carpio (var.)","cat":"riviere"},{"id":"carpe_commune_melanique","nom":"Carpe commune mélanique","sci":"Cyprinus carpio (var.)","cat":"riviere"},{"id":"gardon","nom":"Gardon","sci":"Rutilus rutilus","cat":"riviere"},{"id":"rotengle","nom":"Rotengle","sci":"Scardinius erythrophthalmus","cat":"riviere"},{"id":"breme","nom":"Brème commune","sci":"Abramis brama","cat":"riviere"},{"id":"tanche","nom":"Tanche","sci":"Tinca tinca","cat":"riviere"},{"id":"chevesne","nom":"Chevesne","sci":"Squalius cephalus","cat":"riviere"},{"id":"barbeau","nom":"Barbeau fluviatile","sci":"Barbus barbus","cat":"riviere"},{"id":"anguille","nom":"Anguille","sci":"Anguilla anguilla","cat":"riviere"},{"id":"ombre","nom":"Ombre commun","sci":"Thymallus thymallus","cat":"riviere"},{"id":"vandoise","nom":"Vandoise","sci":"Leuciscus leuciscus","cat":"riviere"},{"id":"ablette","nom":"Ablette","sci":"Alburnus alburnus","cat":"riviere"},{"id":"goujon","nom":"Goujon","sci":"Gobio gobio","cat":"riviere"},{"id":"hotu","nom":"Hotu","sci":"Chondrostoma nasus","cat":"riviere"},{"id":"gremille","nom":"Grémille","sci":"Gymnocephalus cernua","cat":"riviere"},{"id":"lamproie_riviere","nom":"Lamproie de rivière","sci":"Lampetra fluviatilis","cat":"riviere"},{"id":"alose_feinte","nom":"Alose feinte","sci":"Alosa fallax","cat":"riviere"},{"id":"grande_alose","nom":"Grande alose","sci":"Alosa alosa","cat":"riviere"},{"id":"saumon_atlantique","nom":"Saumon atlantique","sci":"Salmo salar","cat":"riviere"},{"id":"truite_de_mer","nom":"Truite de mer","sci":"Salmo trutta trutta","cat":"riviere"},{"id":"esturgeon_europeen","nom":"Esturgeon européen","sci":"Acipenser sturio","cat":"riviere"},{"id":"loche_franche","nom":"Loche franche","sci":"Barbatula barbatula","cat":"riviere"},{"id":"bouviere","nom":"Bouvière","sci":"Rhodeus amarus","cat":"riviere"},{"id":"spirlin","nom":"Spirlin","sci":"Alburnoides bipunctatus","cat":"riviere"},{"id":"toxostome","nom":"Toxostome","sci":"Parachondrostoma toxostoma","cat":"riviere"},{"id":"blageon","nom":"Blageon","sci":"Telestes souffia","cat":"riviere"},{"id":"able_heckel","nom":"Able de Heckel","sci":"Leucaspius delineatus","cat":"riviere"},{"id":"lamproie_planer","nom":"Lamproie de Planer","sci":"Lampetra planeri","cat":"riviere"},{"id":"lamproie_marine","nom":"Lamproie marine","sci":"Petromyzon marinus","cat":"riviere"},{"id":"loche_de_riviere","nom":"Loche de rivière","sci":"Cobitis taenia","cat":"riviere"},{"id":"barbeau_meridional","nom":"Barbeau méridional","sci":"Barbus meridionalis","cat":"riviere"},{"id":"brochet_aquitain","nom":"Brochet aquitain","sci":"Esox aquitanicus","cat":"riviere"},{"id":"truite_lacustre","nom":"Truite lacustre","sci":"Salmo trutta lacustris","cat":"lac"},{"id":"corregone","nom":"Corégone","sci":"Coregonus lavaretus","cat":"lac"},{"id":"omble_chevalier","nom":"Omble chevalier","sci":"Salvelinus alpinus","cat":"lac"},{"id":"aspe","nom":"Aspe","sci":"Leuciscus aspius","cat":"lac"},{"id":"lote","nom":"Lote de rivière (Lotte d'eau douce)","sci":"Lota lota","cat":"lac"},{"id":"fera","nom":"Féra","sci":"Coregonus fera","cat":"lac"},{"id":"breme_bordeliere","nom":"Brème bordelière","sci":"Blicca bjoerkna","cat":"lac"},{"id":"chabot","nom":"Chabot","sci":"Cottus gobio","cat":"montagne"},{"id":"vairon","nom":"Vairon","sci":"Phoxinus phoxinus","cat":"montagne"},{"id":"omble_fontaine","nom":"Omble de fontaine","sci":"Salvelinus fontinalis","cat":"montagne"},{"id":"carpe_miroir","nom":"Carpe miroir","sci":"Cyprinus carpio (var.)","cat":"etang"},{"id":"carpe_miroir_albinos","nom":"Carpe miroir albinos","sci":"Cyprinus carpio (var.)","cat":"etang"},{"id":"carpe_lineaire","nom":"Carpe linéaire","sci":"Cyprinus carpio (var.)","cat":"etang"},{"id":"poisson_chat","nom":"Poisson-chat","sci":"Ameiurus melas","cat":"etang"},{"id":"amour_blanc","nom":"Carpe amour blanc","sci":"Ctenopharyngodon idella","cat":"etang"},{"id":"amour_blanc_albinos","nom":"Amour blanc albinos","sci":"Ctenopharyngodon idella (var.)","cat":"etang"},{"id":"loche_etang","nom":"Loche d'étang","sci":"Misgurnus fossilis","cat":"etang"},{"id":"carassin","nom":"Carassin commun","sci":"Carassius carassius","cat":"etang"},{"id":"carassin_albinos","nom":"Carassin commun albinos","sci":"Carassius carassius (var.)","cat":"etang"},{"id":"carpe_cuir","nom":"Carpe cuir","sci":"Cyprinus carpio (var.)","cat":"etang"},{"id":"carpe_cuir_albinos","nom":"Carpe cuir albinos","sci":"Cyprinus carpio (var.)","cat":"etang"},{"id":"epinoche","nom":"Épinoche","sci":"Gasterosteus aculeatus","cat":"etang"},{"id":"truite_doree","nom":"Truite dorée (Palomino)","sci":"Oncorhynchus mykiss (var.)","cat":"etang"},{"id":"loup_bar_med","nom":"Loup (bar)","sci":"Dicentrarchus labrax","cat":"mer_med"},{"id":"dorade_royale","nom":"Dorade royale","sci":"Sparus aurata","cat":"mer_med"},{"id":"sar","nom":"Sar commun","sci":"Diplodus sargus","cat":"mer_med"},{"id":"sparaillon","nom":"Sparaillon","sci":"Diplodus annularis","cat":"mer_med"},{"id":"rouget","nom":"Rouget de roche","sci":"Mullus surmuletus","cat":"mer_med"},{"id":"rascasse","nom":"Rascasse rouge","sci":"Scorpaena scrofa","cat":"mer_med"},{"id":"merou","nom":"Mérou brun","sci":"Epinephelus marginatus","cat":"mer_med"},{"id":"saint_pierre","nom":"Saint-Pierre","sci":"Zeus faber","cat":"mer_med"},{"id":"bonite","nom":"Bonite à dos rayé","sci":"Sarda sarda","cat":"mer_med"},{"id":"thon_rouge","nom":"Thon rouge","sci":"Thunnus thynnus","cat":"mer_med"},{"id":"denti","nom":"Denti","sci":"Dentex dentex","cat":"mer_med"},{"id":"pagre","nom":"Pagre commun","sci":"Pagrus pagrus","cat":"mer_med"},{"id":"pageot","nom":"Pageot commun","sci":"Pagellus erythrinus","cat":"mer_med"},{"id":"marbre","nom":"Marbré","sci":"Lithognathus mormyrus","cat":"mer_med"},{"id":"oblade","nom":"Oblade","sci":"Oblada melanura","cat":"mer_med"},{"id":"bogue","nom":"Bogue","sci":"Boops boops","cat":"mer_med"},{"id":"girelle","nom":"Girelle commune","sci":"Coris julis","cat":"mer_med"},{"id":"serran","nom":"Serran chevrette","sci":"Serranus cabrilla","cat":"mer_med"},{"id":"murene","nom":"Murène","sci":"Muraena helena","cat":"mer_med"},{"id":"corb","nom":"Corb","sci":"Sciaena umbra","cat":"mer_med"},{"id":"liche","nom":"Liche","sci":"Lichia amia","cat":"mer_med"},{"id":"anchois","nom":"Anchois","sci":"Engraulis encrasicolus","cat":"mer_med"},{"id":"sardine","nom":"Sardine","sci":"Sardina pilchardus","cat":"mer_med"},{"id":"requin_bleu","nom":"Requin peau bleue","sci":"Prionace glauca","cat":"mer_med"},{"id":"sar_tete_noire","nom":"Sar à tête noire","sci":"Diplodus vulgaris","cat":"mer_med"},{"id":"vieille","nom":"Vieille (labre brun)","sci":"Labrus merula","cat":"mer_med"},{"id":"atherine","nom":"Athérine","sci":"Atherina hepsetus","cat":"mer_med"},{"id":"poisson_lune","nom":"Poisson-lune","sci":"Mola mola","cat":"mer_med"},{"id":"barracuda_med","nom":"Barracuda méditerranéen","sci":"Sphyraena sphyraena","cat":"mer_med"},{"id":"poisson_globe","nom":"Poisson-globe argenté","sci":"Lagocephalus sceleratus","cat":"mer_med"},{"id":"poisson_lion","nom":"Poisson-lion","sci":"Pterois miles","cat":"mer_med"},{"id":"baliste","nom":"Baliste commun","sci":"Balistes capriscus","cat":"mer_med"},{"id":"crenilabre","nom":"Crénilabre","sci":"Symphodus tinca","cat":"mer_med"},{"id":"bar_atl","nom":"Bar commun","sci":"Dicentrarchus labrax","cat":"mer_atl"},{"id":"maquereau","nom":"Maquereau","sci":"Scomber scombrus","cat":"mer_atl"},{"id":"lieu_jaune","nom":"Lieu jaune","sci":"Pollachius pollachius","cat":"mer_atl"},{"id":"lieu_noir","nom":"Lieu noir","sci":"Pollachius virens","cat":"mer_atl"},{"id":"turbot","nom":"Turbot","sci":"Scophthalmus maximus","cat":"mer_atl"},{"id":"sole","nom":"Sole commune","sci":"Solea solea","cat":"mer_atl"},{"id":"congre","nom":"Congre","sci":"Conger conger","cat":"mer_atl"},{"id":"raie_bouclee","nom":"Raie bouclée","sci":"Raja clavata","cat":"mer_atl"},{"id":"chinchard","nom":"Chinchard","sci":"Trachurus trachurus","cat":"mer_atl"},{"id":"grondin","nom":"Grondin rouge","sci":"Chelidonichthys lucerna","cat":"mer_atl"},{"id":"vive","nom":"Grande vive","sci":"Trachinus draco","cat":"mer_atl"},{"id":"baudroie","nom":"Baudroie (lotte de mer)","sci":"Lophius piscatorius","cat":"mer_atl"},{"id":"espadon","nom":"Espadon","sci":"Xiphias gladius","cat":"mer_atl"},{"id":"mulet","nom":"Mulet (mulet cabot)","sci":"Mugil cephalus","cat":"mer_atl"},{"id":"dorade_grise","nom":"Dorade grise (griset)","sci":"Spondyliosoma cantharus","cat":"mer_atl"},{"id":"esturgeon_gironde","nom":"Esturgeon de Gironde","sci":"Acipenser sturio","cat":"mer_atl"},{"id":"maigre","nom":"Maigre","sci":"Argyrosomus regius","cat":"mer_atl"},{"id":"milandre","nom":"Milandre (requin hâ)","sci":"Galeorhinus galeus","cat":"mer_atl"},{"id":"requin_taupe","nom":"Requin taupe commun","sci":"Lamna nasus","cat":"mer_atl"},{"id":"poutassou","nom":"Poutassou (merlan bleu)","sci":"Micromesistius poutassou","cat":"mer_atl"},{"id":"cardine","nom":"Cardine (limande sole)","sci":"Lepidorhombus whiffiagonis","cat":"mer_atl"},{"id":"merlan","nom":"Merlan","sci":"Merlangius merlangus","cat":"manche"},{"id":"tacaud","nom":"Tacaud","sci":"Trisopterus luscus","cat":"manche"},{"id":"julienne","nom":"Julienne (lingue)","sci":"Molva molva","cat":"manche"},{"id":"coquille_st_jacques","nom":"Coquille Saint-Jacques","sci":"Pecten maximus","cat":"manche"},{"id":"flet","nom":"Flet","sci":"Platichthys flesus","cat":"manche"},{"id":"limande","nom":"Limande","sci":"Limanda limanda","cat":"manche"},{"id":"plie","nom":"Plie (carrelet)","sci":"Pleuronectes platessa","cat":"manche"},{"id":"barbue","nom":"Barbue","sci":"Scophthalmus rhombus","cat":"manche"},{"id":"roussette","nom":"Petite roussette","sci":"Scyliorhinus canicula","cat":"manche"},{"id":"emissole","nom":"Émissole","sci":"Mustelus mustelus","cat":"manche"},{"id":"aiguillat","nom":"Aiguillat commun","sci":"Squalus acanthias","cat":"manche"},{"id":"hareng","nom":"Hareng","sci":"Clupea harengus","cat":"manche"},{"id":"sprat","nom":"Sprat","sci":"Sprattus sprattus","cat":"manche"},{"id":"lancon","nom":"Lançon","sci":"Ammodytes tobianus","cat":"manche"},{"id":"grande_roussette","nom":"Grande roussette","sci":"Scyliorhinus stellaris","cat":"manche"},{"id":"poisson_chat_am","nom":"Poisson-chat américain","sci":"Ameiurus nebulosus","cat":"exotique"},{"id":"perche_soleil","nom":"Perche soleil","sci":"Lepomis gibbosus","cat":"exotique"},{"id":"pseudorasbora","nom":"Pseudorasbora","sci":"Pseudorasbora parva","cat":"exotique"},{"id":"esturgeon_siberien","nom":"Esturgeon sibérien","sci":"Acipenser baerii","cat":"exotique"},{"id":"esturgeon_russe","nom":"Esturgeon russe","sci":"Acipenser gueldenstaedtii","cat":"exotique"},{"id":"carassin_argente","nom":"Carassin argenté","sci":"Carassius gibelio","cat":"exotique"},{"id":"carassin_argente_albinos","nom":"Carassin argenté albinos","sci":"Carassius gibelio (var.)","cat":"exotique"},{"id":"ide_melanote","nom":"Ide mélanote","sci":"Leuciscus idus","cat":"exotique"},{"id":"gambusie","nom":"Gambusie","sci":"Gambusia holbrooki","cat":"exotique"},{"id":"poisson_rouge","nom":"Poisson rouge échappé","sci":"Carassius auratus","cat":"exotique"},{"id":"koi_blanche","nom":"Koï blanche (Shiro)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_jaune","nom":"Koï jaune (Yamabuki)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_orange","nom":"Koï orange","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_rouge","nom":"Koï rouge (Hi)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_kohaku","nom":"Koï rouge et blanche (Kohaku)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_sanke","nom":"Koï tricolore (Sanke)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_utsuri","nom":"Koï noire (Utsuri)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_showa","nom":"Koï Showa (Showa Sanshoku)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_ogon","nom":"Koï Ogon (métallique)","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"amour_noir","nom":"Amour noir","sci":"Mylopharyngodon piceus","cat":"exotique"},{"id":"carpe_argentee","nom":"Carpe argentée","sci":"Hypophthalmichthys molitrix","cat":"exotique"},{"id":"carpe_grosse_tete","nom":"Carpe à grosse tête","sci":"Hypophthalmichthys nobilis","cat":"exotique"},{"id":"ecrevisse_americaine","nom":"Écrevisse américaine","sci":"Faxonius limosus","cat":"crustaces"},{"id":"ecrevisse_pattes_blanches","nom":"Écrevisse à pattes blanches","sci":"Austropotamobius pallipes","cat":"crustaces"},{"id":"homard","nom":"Homard européen","sci":"Homarus gammarus","cat":"crustaces"},{"id":"langouste","nom":"Langouste rouge","sci":"Palinurus elephas","cat":"crustaces"},{"id":"etrille","nom":"Étrille","sci":"Necora puber","cat":"crustaces"},{"id":"tourteau","nom":"Tourteau (crabe dormeur)","sci":"Cancer pagurus","cat":"crustaces"},{"id":"araignee_mer","nom":"Araignée de mer","sci":"Maja squinado","cat":"crustaces"},{"id":"bouquet","nom":"Bouquet (crevette rose)","sci":"Palaemon serratus","cat":"crustaces"},{"id":"crevette_grise","nom":"Crevette grise","sci":"Crangon crangon","cat":"crustaces"},{"id":"ecrevisse_signal","nom":"Écrevisse signal","sci":"Pacifastacus leniusculus","cat":"crustaces"},{"id":"cigale_mer","nom":"Cigale de mer","sci":"Scyllarides latus","cat":"crustaces"},{"id":"pouce_pied","nom":"Pouce-pied","sci":"Pollicipes pollicipes","cat":"crustaces"},{"id":"crabe_chinois","nom":"Crabe chinois","sci":"Eriocheir sinensis","cat":"crustaces"},{"id":"seiche","nom":"Seiche commune","sci":"Sepia officinalis","cat":"cephalopodes"},{"id":"calamar","nom":"Calamar / encornet","sci":"Loligo vulgaris","cat":"cephalopodes"},{"id":"poulpe","nom":"Poulpe commun","sci":"Octopus vulgaris","cat":"cephalopodes"},{"id":"encornet_rouge","nom":"Encornet rouge","sci":"Illex coindetii","cat":"cephalopodes"},{"id":"sepiole","nom":"Sépiole (petite seiche)","sci":"Sepiola spp.","cat":"cephalopodes"},{"id":"casseron","nom":"Casseron","sci":"Alloteuthis subulata","cat":"cephalopodes"},{"id":"eledone","nom":"Élédone (poulpe blanc)","sci":"Eledone cirrhosa","cat":"cephalopodes"},{"id":"moule","nom":"Moule commune","sci":"Mytilus edulis","cat":"coquillages"},{"id":"huitre_plate","nom":"Huître plate","sci":"Ostrea edulis","cat":"coquillages"},{"id":"huitre_creuse","nom":"Huître creuse","sci":"Crassostrea gigas","cat":"coquillages"},{"id":"palourde","nom":"Palourde","sci":"Ruditapes decussatus","cat":"coquillages"},{"id":"coque","nom":"Coque","sci":"Cerastoderma edule","cat":"coquillages"},{"id":"bigorneau","nom":"Bigorneau","sci":"Littorina littorea","cat":"coquillages"},{"id":"praire","nom":"Praire","sci":"Venus verrucosa","cat":"coquillages"},{"id":"vernis","nom":"Vernis (praire lisse)","sci":"Callista chione","cat":"coquillages"},{"id":"couteau","nom":"Couteau","sci":"Ensis directus","cat":"coquillages"},{"id":"ormeau","nom":"Ormeau","sci":"Haliotis tuberculata","cat":"coquillages"},{"id":"bulot","nom":"Bulot","sci":"Buccinum undatum","cat":"coquillages"},{"id":"telline","nom":"Telline","sci":"Donax trunculus","cat":"coquillages"},{"id":"datte_mer","nom":"Datte de mer","sci":"Lithophaga lithophaga","cat":"coquillages"},{"id":"oursin","nom":"Oursin violet","sci":"Paracentrotus lividus","cat":"coquillages"},{"id":"violet","nom":"Violet (figue de mer)","sci":"Microcosmus sallahi","cat":"coquillages"},{"id":"moule_zebree","nom":"Moule zébrée","sci":"Dreissena polymorpha","cat":"coquillages"},{"id":"corbicule","nom":"Corbicule asiatique","sci":"Corbicula fluminea","cat":"coquillages"},{"id":"petoncle","nom":"Pétoncle","sci":"Aequipecten opercularis","cat":"coquillages"},{"id":"truite_tigre","nom":"Truite tigre","sci":"Salmo trutta x Salvelinus fontinalis","cat":"riviere"},{"id":"cristivomer","nom":"Cristivomer (touladi)","sci":"Salvelinus namaycush","cat":"lac"},{"id":"coregone_peled","nom":"Corégone peled","sci":"Coregonus peled","cat":"lac"},{"id":"epinochette","nom":"Épinochette","sci":"Pungitius pungitius","cat":"riviere"},{"id":"eperlan","nom":"Éperlan","sci":"Osmerus eperlanus","cat":"riviere"},{"id":"loche_montagne","nom":"Loche de montagne","sci":"Barbatula sp.","cat":"montagne"},{"id":"dorade_rose","nom":"Dorade rose","sci":"Pagellus bogaraveo","cat":"mer_med"},{"id":"dorade_coryphene","nom":"Dorade coryphène","sci":"Coryphaena hippurus","cat":"mer_med"},{"id":"tassergal","nom":"Tassergal","sci":"Pomatomus saltatrix","cat":"mer_med"},{"id":"seriole","nom":"Sériole (liche amie)","sci":"Seriola dumerili","cat":"mer_med"},{"id":"thon_germon","nom":"Thon germon (albacore blanc)","sci":"Thunnus alalunga","cat":"mer_med"},{"id":"thon_listao","nom":"Thon listao (bonite à ventre rayé)","sci":"Katsuwonus pelamis","cat":"mer_med"},{"id":"thon_albacore","nom":"Thon albacore","sci":"Thunnus albacares","cat":"mer_med"},{"id":"thon_obese","nom":"Thon obèse","sci":"Thunnus obesus","cat":"mer_med"},{"id":"bonitou","nom":"Bonitou (melva)","sci":"Auxis rochei","cat":"mer_med"},{"id":"barracuda_jaune","nom":"Barracuda jaune","sci":"Sphyraena viridensis","cat":"mer_med"},{"id":"loup_tachete","nom":"Loup tacheté","sci":"Dicentrarchus punctatus","cat":"mer_med"},{"id":"rouget_barbet_vase","nom":"Rouget barbet de vase","sci":"Mullus barbatus","cat":"mer_med"},{"id":"requin_mako","nom":"Requin mako","sci":"Isurus oxyrinchus","cat":"mer_med"},{"id":"requin_griset","nom":"Requin griset","sci":"Hexanchus griseus","cat":"mer_med"},{"id":"ange_mer","nom":"Ange de mer","sci":"Squatina squatina","cat":"mer_med"},{"id":"raie_brunette","nom":"Raie brunette","sci":"Raja miraletus","cat":"mer_med"},{"id":"raie_fleurie","nom":"Raie fleurie","sci":"Raja undulata","cat":"mer_med"},{"id":"raie_douce","nom":"Raie douce","sci":"Raja montagui","cat":"mer_med"},{"id":"raie_pastenague","nom":"Raie pastenague","sci":"Dasyatis pastinaca","cat":"mer_med"},{"id":"aigle_mer","nom":"Aigle de mer","sci":"Myliobatis aquila","cat":"mer_med"},{"id":"diable_mer","nom":"Diable de mer","sci":"Mobula mobular","cat":"mer_med"},{"id":"epinoche_mer","nom":"Épinoche de mer","sci":"Spinachia spinachia","cat":"manche"},{"id":"mulet_sauteur","nom":"Mulet sauteur","sci":"Liza saliens","cat":"mer_atl"},{"id":"mulet_dore","nom":"Mulet doré","sci":"Liza aurata","cat":"mer_atl"},{"id":"mulet_lippu","nom":"Mulet lippu","sci":"Chelon labrosus","cat":"mer_atl"},{"id":"sabre_argente","nom":"Sabre argenté","sci":"Lepidopus caudatus","cat":"mer_atl"},{"id":"sabre_noir","nom":"Sabre noir","sci":"Aphanopus carbo","cat":"mer_atl"},{"id":"lingue_bleue","nom":"Lingue bleue","sci":"Molva dypterygia","cat":"mer_atl"},{"id":"requin_renard","nom":"Requin-renard","sci":"Alopias vulpinus","cat":"mer_atl"},{"id":"requin_aiguillat_noir","nom":"Requin aiguillat noir","sci":"Etmopterus spinax","cat":"mer_atl"},{"id":"crabe_vert","nom":"Crabe vert (crabe enragé)","sci":"Carcinus maenas","cat":"crustaces"},{"id":"bernard_ermite","nom":"Bernard-l'ermite","sci":"Pagurus bernhardus","cat":"crustaces"},{"id":"crabe_nageur","nom":"Crabe nageur","sci":"Liocarcinus depurator","cat":"crustaces"},{"id":"crabe_marbre","nom":"Crabe marbré","sci":"Pachygrapsus marmoratus","cat":"crustaces"},{"id":"galathee","nom":"Galathée","sci":"Galathea squamifera","cat":"crustaces"},{"id":"langoustine","nom":"Langoustine","sci":"Nephrops norvegicus","cat":"crustaces"},{"id":"amande_mer","nom":"Amande de mer","sci":"Glycymeris glycymeris","cat":"coquillages"},{"id":"patelle","nom":"Patelle (bernique)","sci":"Patella vulgata","cat":"coquillages"},{"id":"patelle_geante","nom":"Patelle géante","sci":"Patella ferruginea","cat":"coquillages"},{"id":"petoncle_noir","nom":"Pétoncle noir","sci":"Mimachlamys varia","cat":"coquillages"},{"id":"clam","nom":"Clam","sci":"Mercenaria mercenaria","cat":"coquillages"},{"id":"mye","nom":"Mye commune","sci":"Mya arenaria","cat":"coquillages"},{"id":"mactre","nom":"Mactre","sci":"Mactra stultorum","cat":"coquillages"},{"id":"lavignon","nom":"Lavignon","sci":"Scrobicularia plana","cat":"coquillages"},{"id":"calmar_veine","nom":"Calmar veiné","sci":"Loligo forbesii","cat":"cephalopodes"},{"id":"calmar_volant","nom":"Calmar volant","sci":"Todarodes sagittatus","cat":"cephalopodes"},{"id":"seiche_rosee","nom":"Seiche rosée","sci":"Sepia orbignyana","cat":"cephalopodes"},{"id":"sar_tambour","nom":"Sar tambour","sci":"Diplodus cervinus","cat":"mer_med"},{"id":"pageot_acarne","nom":"Pageot acarné","sci":"Pagellus acarne","cat":"mer_med"},{"id":"rascasse_brune","nom":"Rascasse brune","sci":"Scorpaena porcus","cat":"mer_med"},{"id":"rascasse_blanche","nom":"Rascasse blanche (petite rascasse)","sci":"Scorpaena notata","cat":"mer_med"},{"id":"serran_ecriture","nom":"Serran écriture","sci":"Serranus scriba","cat":"mer_med"},{"id":"girelle_paon","nom":"Girelle-paon","sci":"Thalassoma pavo","cat":"mer_med"},{"id":"crenilabre_melops","nom":"Crénilabre mélops","sci":"Symphodus melops","cat":"mer_med"},{"id":"blennie_paon","nom":"Blennie paon","sci":"Salaria pavo","cat":"mer_med"},{"id":"blennie_gattorugine","nom":"Blennie gattorugine","sci":"Parablennius gattorugine","cat":"mer_med"},{"id":"gobie_noir","nom":"Gobie noir","sci":"Gobius niger","cat":"mer_med"},{"id":"gobie_mouchete","nom":"Gobie moucheté","sci":"Pomatoschistus microps","cat":"mer_med"},{"id":"gobie_paganel","nom":"Gobie paganel","sci":"Gobius paganellus","cat":"mer_med"},{"id":"dragonnet_lyre","nom":"Dragonnet lyre","sci":"Callionymus lyra","cat":"mer_med"},{"id":"vive_araignee","nom":"Vive araignée","sci":"Trachinus araneus","cat":"mer_med"},{"id":"vive_rayee","nom":"Vive rayée (petite vive)","sci":"Echiichthys vipera","cat":"mer_med"},{"id":"orphie","nom":"Orphie (poisson-aiguille)","sci":"Belone belone","cat":"mer_med"},{"id":"syngnathe_aiguille","nom":"Syngnathe aiguille","sci":"Syngnathus acus","cat":"mer_med"},{"id":"syngnathe_tachete","nom":"Syngnathe tacheté","sci":"Syngnathus typhle","cat":"mer_med"},{"id":"poisson_porc_epic","nom":"Poisson porc-épic","sci":"Diodon hystrix","cat":"mer_med"},{"id":"torpille_commune","nom":"Torpille commune","sci":"Torpedo torpedo","cat":"mer_med"},{"id":"torpille_marbree","nom":"Torpille marbrée","sci":"Torpedo marmorata","cat":"mer_med"},{"id":"remora_raye","nom":"Rémora rayé","sci":"Echeneis naucrates","cat":"mer_med"},{"id":"seriole_couronnee","nom":"Sériole couronnée","sci":"Seriola fasciata","cat":"mer_med"},{"id":"merou_royal","nom":"Mérou royal","sci":"Mycteroperca rubra","cat":"mer_med"},{"id":"merou_blanc","nom":"Mérou blanc","sci":"Epinephelus aeneus","cat":"mer_med"},{"id":"marlin_bleu","nom":"Marlin bleu","sci":"Makaira nigricans","cat":"mer_med"},{"id":"marlin_blanc","nom":"Marlin blanc","sci":"Kajikia albida","cat":"mer_med"},{"id":"raie_melee","nom":"Raie mêlée","sci":"Raja polystigma","cat":"mer_med"},{"id":"pocheteau_gris","nom":"Pocheteau gris","sci":"Rostroraja alba","cat":"mer_med"},{"id":"merlu_europeen","nom":"Merlu européen","sci":"Merluccius merluccius","cat":"mer_atl"},{"id":"grondin_gris","nom":"Grondin gris","sci":"Eutrigla gurnardus","cat":"mer_atl"},{"id":"trigle_lyre","nom":"Trigle lyre","sci":"Trigla lyra","cat":"mer_atl"},{"id":"trigle_volant","nom":"Trigle volant","sci":"Dactylopterus volitans","cat":"mer_atl"},{"id":"crabe_bleu","nom":"Crabe bleu","sci":"Callinectes sapidus","cat":"crustaces"},{"id":"crabe_verruqueux","nom":"Crabe verruqueux","sci":"Eriphia verrucosa","cat":"crustaces"},{"id":"langouste_rose","nom":"Langouste rose","sci":"Palinurus mauritanicus","cat":"crustaces"},{"id":"crevette_nordique","nom":"Crevette nordique","sci":"Pandalus borealis","cat":"crustaces"},{"id":"crevette_pistolet","nom":"Crevette pistolet","sci":"Alpheus dentipes","cat":"crustaces"},{"id":"crevette_herbiers","nom":"Crevette des herbiers","sci":"Hippolyte inermis","cat":"crustaces"},{"id":"ecrevisse_louisiane","nom":"Écrevisse de Louisiane","sci":"Procambarus clarkii","cat":"crustaces"},{"id":"ecrevisse_pattes_rouges","nom":"Écrevisse à pattes rouges","sci":"Astacus astacus","cat":"crustaces"},{"id":"bernard_ermite_geant","nom":"Bernard-l'ermite géant","sci":"Dardanus calidus","cat":"crustaces"},{"id":"moule_mediterraneenne","nom":"Moule méditerranéenne","sci":"Mytilus galloprovincialis","cat":"coquillages"},{"id":"palourde_japonaise","nom":"Palourde japonaise","sci":"Ruditapes philippinarum","cat":"coquillages"},{"id":"mactre_solide","nom":"Mactre solide","sci":"Spisula solida","cat":"coquillages"},{"id":"crepidule","nom":"Crépidule","sci":"Crepidula fortunata","cat":"coquillages"},{"id":"troque","nom":"Troque commune","sci":"Phorcus lineatus","cat":"coquillages"},{"id":"littorine_obtuse","nom":"Littorine obtuse","sci":"Littorina obtusata","cat":"coquillages"},{"id":"nasse_reticulee","nom":"Nasse réticulée","sci":"Tritia reticulata","cat":"coquillages"},{"id":"murex_epineux","nom":"Murex épineux","sci":"Bolinus brandaris","cat":"coquillages"},{"id":"porcelaine_med","nom":"Porcelaine méditerranéenne","sci":"Luria lurida","cat":"coquillages"},{"id":"oursin_noir","nom":"Oursin noir","sci":"Arbacia lixula","cat":"coquillages"},{"id":"oursin_comestible","nom":"Oursin comestible","sci":"Echinus esculentus","cat":"coquillages"},{"id":"holothurie_sable","nom":"Holothurie de sable","sci":"Holothuria sanctori","cat":"coquillages"},{"id":"holothurie_noire","nom":"Holothurie noire","sci":"Holothuria forskali","cat":"coquillages"},{"id":"esturgeon_blanc","nom":"Esturgeon blanc","sci":"Acipenser transmontanus","cat":"exotique"},{"id":"bester","nom":"Bester","sci":"Huso huso x Acipenser ruthenus","cat":"exotique"},{"id":"koi_papillon","nom":"Koï papillon","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_tancho","nom":"Koï Tancho","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_ginrin","nom":"Koï Ginrin","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_doitsu","nom":"Koï Doitsu","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_bekko","nom":"Koï Bekko","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_asagi","nom":"Koï Asagi","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_shusui","nom":"Koï Shusui","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_kikokuryu","nom":"Koï Kikokuryu","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"koi_kujaku","nom":"Koï Kujaku","sci":"Cyprinus rubrofuscus (var.)","cat":"exotique"},{"id":"perche_albinos","nom":"Perche albinos","sci":"Perca fluviatilis (var.)","cat":"riviere"},{"id":"black_bass_albinos","nom":"Black-bass albinos","sci":"Micropterus salmoides (var.)","cat":"riviere"},{"id":"poisson_chat_albinos","nom":"Poisson-chat albinos","sci":"Ameiurus melas (var.)","cat":"etang"},{"id":"esturgeon_albinos","nom":"Esturgeon albinos","sci":"Acipenser sp. (var.)","cat":"riviere"},{"id":"truite_arc_albinos","nom":"Truite arc-en-ciel albinos","sci":"Oncorhynchus mykiss (var.)","cat":"riviere"},{"id":"omble_fontaine_albinos","nom":"Omble de fontaine albinos","sci":"Salvelinus fontinalis (var.)","cat":"montagne"},{"id":"vandoise_rostree","nom":"Vandoise rostrée","sci":"Leuciscus burdigalensis","cat":"riviere"},{"id":"apron_rhone","nom":"Apron du Rhône","sci":"Zingel asper","cat":"riviere"},{"id":"chabot_lez","nom":"Chabot du Lez","sci":"Cottus lez","cat":"riviere"},{"id":"civelle","nom":"Civelle (jeune anguille)","sci":"Anguilla anguilla (stade juvénile)","cat":"riviere"},{"id":"gobie_demi_lune","nom":"Gobie demi-lune","sci":"Proterorhinus semilunaris","cat":"riviere"}];
+const MODELES = [
+  { cle: "gemma", nom: "Gemma 4 26B", note: "Google · le moins cher" },
+  { cle: "glm", nom: "GLM-5.3 Flash", note: "Zhipu · gros modèle récent" },
+  { cle: "deepseek", nom: "DeepSeek V4.1 Flash", note: "DeepSeek · le plus gros, le plus cher" },
+  { cle: "mistral", nom: "Mistral Small 3.1", note: "Mistral AI · français" },
+];
+const MILIEUX = {
+  med: "sea, French Mediterranean coast",
+  atl: "sea, French Atlantic or Channel coast",
+  douce: "fresh water in France (river, lake or pond)",
+  tout: "unknown",
+};
+const MILIEUX_FR = { med: "Méditerranée", atl: "Atlantique ou Manche", douce: "eau douce", tout: "milieu inconnu" };
+const MER = new Set(["mer_med", "mer_atl", "manche", "cephalopodes"]);
+const DOUCE = new Set(["riviere", "lac", "montagne", "etang", "exotique"]);
+// les espèces qui passent de la rivière à la mer (ou l'inverse) : dans les deux listes
+const AUSSI_MER = new Set(["anguille", "civelle", "alose_feinte", "grande_alose", "saumon_atlantique", "truite_de_mer", "eperlan", "lamproie_marine", "lamproie_riviere", "esturgeon_europeen"]);
+const AUSSI_DOUCE = new Set(["crabe_chinois", "mulet", "mulet_dore", "mulet_lippu", "mulet_sauteur", "flet", "esturgeon_gironde"]);
+const ECREVISSE = /^Écrevisse/, COQ_DOUCE = /Moule zébrée|Corbicule/;
+function eauDouce(e) {
+  if (DOUCE.has(e.cat) || AUSSI_DOUCE.has(e.id)) return true;
+  if (e.cat === "crustaces") return ECREVISSE.test(e.nom);
+  if (e.cat === "coquillages") return COQ_DOUCE.test(e.nom);
+  return false;
+}
+function mer(e) {
+  if (MER.has(e.cat) || AUSSI_MER.has(e.id)) return true;
+  if (e.cat === "crustaces") return !ECREVISSE.test(e.nom);
+  if (e.cat === "coquillages") return !COQ_DOUCE.test(e.nom);
+  return false;
+}
+function candidats(milieu) {
+  const l = milieu === "douce" ? ESPECES.filter(eauDouce) : milieu === "tout" ? ESPECES : ESPECES.filter(mer);
+  return l.map((e) => ({ id: e.id, nom: e.nom, sci: e.sci }));
+}
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const sec = (ms) => (ms / 1000).toFixed(1).replace(".", ",") + " s";
+const NOMS = new Map(ESPECES.map((e) => [e.id, e.nom]));
+const TRIEES = ESPECES.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+let toastT = null;
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 2600); }
+
+/* ---------- la session HookDex (même format que l'appli, pour ne pas la casser) ---------- */
+function lireSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION) || "null");
+    return s && typeof s.access_token === "string" && typeof s.refresh_token === "string" && s.user && s.user.id ? s : null;
+  } catch (e) { return null; }
+}
+async function renouveler(s) {
+  const res = await fetch(SERVEUR.url + "/auth/v1/token?grant_type=refresh_token", {
+    method: "POST", cache: "no-store", credentials: "omit",
+    headers: { apikey: SERVEUR.cle, "Content-Type": "application/json", "X-Supabase-Api-Version": "2024-01-01" },
+    body: JSON.stringify({ refresh_token: s.refresh_token }),
+  });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const cur = lireSession();
+    if (cur && cur.refresh_token !== s.refresh_token) return cur;   // déjà renouvelée par l'appli
+    return null;
+  }
+  const now = Math.floor(Date.now() / 1000), inS = parseInt(d.expires_in, 10);
+  const u = d.user || {};
+  const n = { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: inS > 0 ? now + inS : parseInt(d.expires_at, 10) || now + 3600, user: { id: u.id || s.user.id, email: u.email || s.user.email || "" } };
+  try { localStorage.setItem(SESSION, JSON.stringify(n)); } catch (e) {}
+  return n;
+}
+let renouvellement = null;
+async function jeton() {
+  const s = lireSession();
+  if (!s) return null;
+  if ((s.expires_at || 0) - Date.now() / 1000 > 60) return s.access_token;
+  if (!renouvellement) renouvellement = renouveler(s).finally(() => { renouvellement = null; });
+  const n = await renouvellement;
+  return n ? n.access_token : null;
+}
+function afficherCompte() {
+  const s = lireSession();
+  $("compte").innerHTML = s
+    ? `<b>✓</b><p>Connecté à HookDex : <b>${esc(s.user.email || "ton compte")}</b>. La reconnaissance marche seulement avec un compte admin.</p>`
+    : `<b>✗</b><p>Pas de compte HookDex connecté dans ce navigateur. Ouvre HookDex dans ce même Chrome, connecte-toi avec ton compte admin (⚙️ Paramètres → Mon compte), puis reviens ici.</p>`;
+  return !!s;
+}
+
+/* ---------- la photo ---------- */
+let photo = null;   // { url (aperçu), donnees (data URL JPEG réduite), largeur, hauteur, ko }
+async function reduire(fichier) {
+  let source, l, h;
+  try {
+    source = await createImageBitmap(fichier);
+    l = source.width; h = source.height;
+  } catch (e) {
+    source = await new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ko; im.src = URL.createObjectURL(fichier); });
+    l = source.naturalWidth; h = source.naturalHeight;
+  }
+  const k = Math.min(1, 1024 / Math.max(l, h));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(l * k)); c.height = Math.max(1, Math.round(h * k));
+  c.getContext("2d").drawImage(source, 0, 0, c.width, c.height);
+  const donnees = c.toDataURL("image/jpeg", 0.85);
+  return { donnees, largeur: c.width, hauteur: c.height, ko: Math.round(donnees.length * 0.75 / 1024) };
+}
+$("fichier").addEventListener("change", async (ev) => {
+  const f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  $("infos-photo").textContent = "Préparation de la photo…";
+  try {
+    const r = await reduire(f);
+    photo = { ...r, nom: f.name, id: Date.now() };
+    $("apercu").src = r.donnees; $("apercu").hidden = false;
+    $("infos-photo").textContent = `Photo prête : ${r.largeur} × ${r.hauteur} pixels, ${r.ko} Ko envoyés.`;
+  } catch (e) {
+    photo = null; $("apercu").hidden = true;
+    $("infos-photo").textContent = "Cette photo ne s'ouvre pas ici. Essaie une autre photo (format JPEG ou PNG).";
+  }
+  majBoutons();
+});
+
+/* ---------- les choix ---------- */
+$("modeles").innerHTML = MODELES.map((m, i) => `<label><input type="radio" name="modele" value="${m.cle}"${i === 0 ? " checked" : ""}> <span>${esc(m.nom)}<small>${esc(m.note)}</small></span></label>`).join("");
+const milieu = () => document.querySelector('input[name="milieu"]:checked').value;
+const modele = () => document.querySelector('input[name="modele"]:checked').value;
+function majCandidats() { $("nb-candidats").textContent = `L'IA choisira parmi ${candidats(milieu()).length} espèces du Dex.`; }
+document.querySelectorAll('input[name="milieu"]').forEach((r) => r.addEventListener("change", majCandidats));
+majCandidats();
+let occupe = false;
+function majBoutons() { const ok = !!photo && !!lireSession() && !occupe; $("lancer").disabled = !ok; $("comparer").disabled = !ok; }
+
+/* ---------- l'appel à la fonction ---------- */
+const MESSAGES = {
+  connexion: "Ta session HookDex a expiré ou est absente : ouvre HookDex, connecte-toi, puis reviens ici.",
+  admin: "Ce compte n'est pas admin : la reconnaissance est réservée aux admins pendant l'essai.",
+};
+async function reconnaitre(cle, p, mil, reflexion) {
+  const t = await jeton();
+  if (!t) return { ok: false, erreur: MESSAGES.connexion };
+  let res;
+  try {
+    res = await fetch(FONCTION, {
+      method: "POST", cache: "no-store", credentials: "omit",
+      headers: { apikey: SERVEUR.cle, Authorization: "Bearer " + t, "Content-Type": "application/json" },
+      body: JSON.stringify({ image: p.donnees, modele: cle, milieu: MILIEUX[mil], candidats: candidats(mil), reflexion: reflexion && cle !== "mistral" }),
+    });
+  } catch (e) {
+    return { ok: false, erreur: "Pas de réponse du serveur HookDex : vérifie ta connexion, puis réessaie." };
+  }
+  if (res.status === 404) return { ok: false, code: "absente", erreur: "La fonction « hookdex-reco » n'existe pas encore sur ton serveur Supabase (étape 3 du guide)." };
+  const d = await res.json().catch(() => null);
+  if (!d) return { ok: false, erreur: "Réponse illisible du serveur (code " + res.status + ")." };
+  if (d.ok) return d;
+  if (!(typeof d.code === "string" && /^[a-z_]+$/.test(d.code))) {
+    // la réponse vient de Supabase lui-même (la fonction n'a pas tourné)
+    const msg = d.message || d.msg || d.error || "code " + res.status;
+    return { ok: false, code: "passerelle", erreur: res.status === 401
+      ? `Supabase refuse la demande (« ${msg} ») : vérifie que « Verify JWT » est bien désactivé pour hookdex-reco (étape 3 du guide).`
+      : `Supabase n'a pas pu lancer la fonction (« ${msg} »). Réessaie dans un instant.` };
+  }
+  return { ...d, erreur: MESSAGES[d.code] || d.erreur || "Erreur." };
+}
+
+/* ---------- les résultats et le bilan ---------- */
+let essais = [];
+try { essais = JSON.parse(localStorage.getItem(BILAN) || "[]") || []; } catch (e) { essais = []; }
+const photos = new Map();   // id de photo → { vignette, resultats: [{cle, rep}], vrai }
+function sauver() { try { localStorage.setItem(BILAN, JSON.stringify(essais)); } catch (e) {} }
+function nomModele(cle) { const m = MODELES.find((x) => x.cle === cle); return m ? m.nom : cle; }
+function verdictIds(ids, vrai) {
+  if (!vrai) return null;
+  return ids[0] === vrai ? "premier" : ids.includes(vrai) ? "trois" : "faux";
+}
+function verdict(rep, vrai) {
+  if (!rep || !rep.ok) return null;
+  return verdictIds((rep.suggestions || []).map((s) => s.id), vrai);
+}
+function carteResultat(cle, rep, vrai) {
+  if (rep === "attente") return `<div class="resultat"><div class="entete-res"><b>${esc(nomModele(cle))}</b><span class="doux"><span class="attente"></span> analyse…</span></div></div>`;
+  const v = verdict(rep, vrai);
+  const classe = v === "faux" ? " faux" : v ? " bon" : "";
+  let corps;
+  if (!rep.ok) corps = `<p class="erreur">${esc(rep.erreur || "Erreur.")}</p>${rep.brut ? `<p class="doux">Réponse reçue : ${esc(rep.brut)}</p>` : ""}`;
+  else if (!rep.visible) corps = `<p>Pas de poisson reconnu sur la photo.</p><p class="doux">${esc(rep.indices || "")}</p>`;
+  else corps = rep.suggestions.map((s) => `<div class="sug"><span class="nom">${s.id === vrai ? "✓ " : ""}${esc(s.nom)}</span><span class="pct">${s.confiance} %</span><span class="sci">${esc(s.sci)}</span><span class="barre"><i style="width:${Math.max(2, s.confiance)}%"></i></span></div>`).join("") + `<p class="doux">${esc(rep.indices || "")}</p>`;
+  const cout = rep.neurons != null ? ` · ${rep.neurons} neurons${rep.par_jour ? ` (≈ ${rep.par_jour} photos gratuites par jour)` : ""}` : "";
+  const duree = rep.duree_ms ? sec(rep.duree_ms) : "";
+  const vt = v === "premier" ? `<p class="verdict bon">✓ Bonne réponse en premier</p>` : v === "trois" ? `<p class="verdict bon">✓ Dans les 3 propositions</p>` : v === "faux" ? `<p class="verdict faux">✗ Pas dans les 3 propositions</p>` : "";
+  return `<div class="resultat${classe}"><div class="entete-res"><b>${esc(nomModele(cle))}${rep.reflexion ? " · réflexion" : ""}</b><span class="doux">${duree}${cout}</span></div>${corps}${vt}</div>`;
+}
+function afficherPhoto(pid) {
+  const p = photos.get(pid);
+  let bloc = document.getElementById("photo-" + pid);
+  if (!bloc) {
+    bloc = document.createElement("div");
+    bloc.className = "photo-bloc"; bloc.id = "photo-" + pid;
+    $("resultats").prepend(bloc);
+  }
+  // en haut de la liste : les espèces proposées par les modèles (un seul appui dans le cas le plus courant)
+  const proposees = [];
+  for (const x of p.resultats) if (x.rep && x.rep.ok) for (const s of x.rep.suggestions || []) if (NOMS.has(s.id) && !proposees.includes(s.id)) proposees.push(s.id);
+  let choisie = false;
+  const opt = (id) => { const sel = id === p.vrai && !choisie; if (sel) choisie = true; return `<option value="${id}"${sel ? " selected" : ""}>${esc(NOMS.get(id))}</option>`; };
+  const options = '<option value="">— choisis l\'espèce —</option>' +
+    (proposees.length ? `<optgroup label="Proposées par l'IA">${proposees.map(opt).join("")}</optgroup>` : "") +
+    `<optgroup label="Toutes les espèces (A → Z)">${TRIEES.map((e) => opt(e.id)).join("")}</optgroup>`;
+  bloc.innerHTML = `<div class="photo-tete"><img src="${p.vignette}" alt=""><div style="flex:1;min-width:0"><label class="doux" for="vrai-${pid}">C'était en vrai :</label><select id="vrai-${pid}">${options}</select></div></div>` + p.resultats.map((x) => carteResultat(x.cle, x.rep, p.vrai)).join("");
+  bloc.querySelector("select").addEventListener("change", (ev) => {
+    p.vrai = ev.target.value || null;
+    for (const e of essais) if (e.photo === pid) { e.vrai = p.vrai; e.verdict = verdictIds(e.sugg, p.vrai); }
+    sauver(); afficherPhoto(pid); afficherBilan();
+  });
+}
+function vignette(donnees) {
+  return new Promise((ok) => {
+    const im = new Image();
+    im.onload = () => { const c = document.createElement("canvas"); const k = 192 / Math.max(im.width, im.height); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); ok(c.toDataURL("image/jpeg", 0.7)); };
+    im.onerror = () => ok("");
+    im.src = donnees;
+  });
+}
+async function lancer(cles) {
+  if (!photo || occupe) return;
+  occupe = true; majBoutons();
+  $("zone-res").hidden = false;
+  const p = photo, mil = milieu(), reflexion = $("reflexion").checked;
+  if (!photos.has(p.id)) photos.set(p.id, { vignette: await vignette(p.donnees), resultats: [], vrai: null });
+  const fiche = photos.get(p.id);
+  for (const cle of cles) {
+    const x = { cle, rep: "attente" };
+    fiche.resultats.push(x); afficherPhoto(p.id);
+    const rep = await reconnaitre(cle, p, mil, reflexion);
+    rep.reflexion = reflexion && cle !== "mistral";
+    x.rep = rep;
+    if (rep.ok) {
+      essais.push({ photo: p.id, cle, reflexion: rep.reflexion, milieu: mil, sugg: (rep.suggestions || []).map((s) => s.id), duree: rep.duree_ms || 0, neurons: rep.neurons || 0, vrai: fiche.vrai, verdict: verdict(rep, fiche.vrai), date: new Date().toISOString().slice(0, 10) });
+      sauver();
+    }
+    afficherPhoto(p.id); afficherBilan();
+    // ces erreurs-là seraient les mêmes pour les modèles suivants : on s'arrête
+    if (["quota", "connexion", "admin", "secret", "jeton", "reseau", "image", "passerelle", "absente"].includes(rep.code)) break;
+  }
+  occupe = false; majBoutons();
+}
+$("lancer").addEventListener("click", () => lancer([modele()]));
+$("comparer").addEventListener("click", () => lancer(MODELES.map((m) => m.cle)));
+
+function lignesBilan() {
+  const groupes = new Map();
+  for (const e of essais) {
+    const k = e.cle + (e.reflexion ? "+r" : "");
+    if (!groupes.has(k)) groupes.set(k, { nom: nomModele(e.cle) + (e.reflexion ? " · réflexion" : ""), n: 0, juges: 0, premier: 0, trois: 0, duree: 0, neurons: 0 });
+    const g = groupes.get(k);
+    g.n++; g.duree += e.duree; g.neurons += e.neurons;
+    if (e.verdict) { g.juges++; if (e.verdict === "premier") g.premier++; if (e.verdict !== "faux") g.trois++; }
+  }
+  return [...groupes.values()];
+}
+function afficherBilan() {
+  const l = lignesBilan();
+  if (!l.length) { $("bilan").innerHTML = '<p class="doux">Pas encore d\'essai.</p>'; return; }
+  const stat = (a, b, quoi) => `<div class="stat"><b>${b ? Math.round(100 * a / b) + " %" : "–"}</b><small>${quoi}${b ? ` · ${a} sur ${b}` : ""}</small></div>`;
+  $("bilan").innerHTML = l.map((g) => `<div class="ligne-bilan"><div><b>${esc(g.nom)}</b><small>${g.n} photo${g.n > 1 ? "s" : ""} · ${sec(g.duree / g.n)} · ${Math.round(g.neurons / g.n)} neurons</small></div>${stat(g.premier, g.juges, "bonne en 1er")}${stat(g.trois, g.juges, "dans les 3")}</div>`).join("") +
+    `<p class="doux">Les pourcentages se comptent sur les photos dont tu as indiqué l'espèce. Temps et neurons : moyenne par photo (10 000 neurons gratuits par jour).</p>`;
+}
+afficherBilan();
+$("copier").addEventListener("click", async () => {
+  const l = lignesBilan();
+  let t = "Bilan de l'essai de reconnaissance HookDex\n";
+  t += l.map((g) => `${g.nom} : ${g.n} photos, bonne espèce en 1er ${g.premier}/${g.juges}, dans les 3 ${g.trois}/${g.juges}, ${sec(g.duree / g.n)}, ${Math.round(g.neurons / g.n)} neurons`).join("\n");
+  t += "\n\nDétail :\n" + essais.map((e) => `${e.date} · ${nomModele(e.cle)}${e.reflexion ? " (réflexion)" : ""} · ${MILIEUX_FR[e.milieu] || e.milieu} · vrai : ${e.vrai ? NOMS.get(e.vrai) : "?"} · proposé : ${e.sugg.map((s) => NOMS.get(s) || s).join(", ") || "rien"}`).join("\n");
+  try { await navigator.clipboard.writeText(t); toast("Bilan copié : colle-le dans la conversation"); }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = t; document.body.append(ta); ta.select(); try { document.execCommand("copy"); toast("Bilan copié"); } catch (e2) { toast("Copie impossible"); } ta.remove(); }
+});
+$("effacer").addEventListener("click", () => {
+  if ($("effacer").dataset.sur !== "1") { $("effacer").dataset.sur = "1"; $("effacer").textContent = "Sûr ? Touche encore"; setTimeout(() => { $("effacer").dataset.sur = ""; $("effacer").textContent = "Effacer le bilan"; }, 3000); return; }
+  essais = []; sauver(); afficherBilan(); $("effacer").dataset.sur = ""; $("effacer").textContent = "Effacer le bilan"; toast("Bilan effacé");
+});
+
+afficherCompte(); majBoutons();
+window.addEventListener("focus", () => { afficherCompte(); majBoutons(); });
+</script>
+</body>
+</html>
