@@ -66,8 +66,9 @@ self.addEventListener("push", (event) => {
   const options = {
     body: String(d.b || "").slice(0, 200),
     icon: "icons/icon-192.png",
-    tag: d.g ? String(d.g).slice(0, 80) : undefined,
-    renotify: !!d.g,
+    // v6.1 : les messages des pêcheurs (admins) ont leur propre groupe
+    tag: d.u === "retours" ? "hookdex-retours" : d.g ? String(d.g).slice(0, 80) : undefined,
+    renotify: !!d.g || d.u === "retours",
     lang: "fr",
     data: { u: String(d.u || "").slice(0, 120) },
   };
