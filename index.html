@@ -2,8 +2,30 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>// v6.1 : la taille du texte (Paramètres → Apparence) : 1 Normal, 2 Grand (×1,15), 3 Très grand (×1,3)
+var FDX_TEXTE = { 1: 1, 2: 1.15, 3: 1.3 };
+function fdxTexteNiveau() { try { var n = +localStorage.getItem("fdx_texte"); return n === 2 || n === 3 ? n : 1; } catch (e) { return 1; } }
+// la largeur de l'écran en points, quel que soit le zoom en cours
+function fdxLargeurEcran() {
+  var v = window.visualViewport, w = v && v.width > 0 ? v.width * v.scale : 0;
+  return w > 160 && w < 4000 ? w : ((window.screen && screen.width) || 0);
+}
+// la page mise en page sur une largeur plus petite (jamais moins de 280 points), puis agrandie à la taille de l'écran
+function fdxTexteMeta(n) {
+  var m = document.querySelector('meta[name="viewport"]'), k = FDX_TEXTE[n] || 1, dw = fdxLargeurEcran(), lw = 0;
+  var c = "width=device-width, initial-scale=1, viewport-fit=cover";
+  if (m && k > 1 && dw > 0) {
+    lw = Math.max(Math.min(280, Math.floor(dw)), Math.round(dw / k));
+    if (lw < dw - 1) c = "width=" + lw + ", initial-scale=" + Math.ceil(dw / lw * 1e4) / 1e4 + ", viewport-fit=cover";
+    else lw = 0;
+  }
+  if (m && m.getAttribute("content") !== c) m.setAttribute("content", c);
+  return lw;
+}
+fdxTexteMeta(fdxTexteNiveau());</script>
 <meta name="theme-color" content="#0B1117">
+<meta name="color-scheme" content="dark light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +42,7 @@
 <meta property="og:image" content="https://hookdexfrance-code.github.io/hookdex-france/icons/icon-512.png">
 <meta property="og:locale" content="fr_FR">
 <meta name="twitter:card" content="summary">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "HookDex France", "alternateName": "HookDex", "url": "https://hookdexfrance-code.github.io/hookdex-france/", "description": "Carnet de pêche gratuit et guide des 327 espèces pêchées en France, en eau douce et en mer : indice de pêche heure par heure, météo et marée de ton coin, règles de pêche 2026, coach qui dit où et quand pêcher, mode sortie avec trajet GPS et cartes hors ligne.", "inLanguage": "fr-FR", "applicationCategory": "SportsApplication", "applicationSubCategory": "Pêche de loisir", "operatingSystem": "Android, iOS, Windows, macOS, Linux (application web installable)", "browserRequirements": "Navigateur récent avec JavaScript", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "softwareVersion": "6.0", "image": "https://hookdexfrance-code.github.io/hookdex-france/icons/icon-512.png", "featureList": ["Carnet de pêche : espèce, taille, poids, photo, position GPS, météo automatique, technique et matériel ; sauvegarde et export JSON ou CSV.", "Le Dex : 327 espèces de France (rivière, lac, montagne, étang, Méditerranée, Atlantique, Manche, crustacés, céphalopodes, coquillages) avec habitat, tailles, période, appâts et leurres.", "Mon coin sur la carte : plan OpenStreetMap, plan et photos aériennes de l'IGN, recherche de commune, coins favoris.", "Indice de pêche de 0 à 100, heure par heure : périodes solunaires, aube et crépuscule, phase de la lune, pression, vent, pluie, orage et marée.", "Prédiction par espèce : chaque espèce a son propre modèle (ses heures, sa saison, la température et l'évolution de l'eau, la lune, la pression, le vent, le ciel, la pluie, la marée, l'état de la mer, le type et la profondeur du coin, chacun avec son poids) ; l'accueil compare les espèces en % de conditions favorables.", "Apprentissage : tes sorties terminées (même sans prise), tes prises datées et tes réponses « pris / pas pris » ajustent le modèle de chaque espèce par estimation bayésienne ; le calcul se vérifie facteur par facteur.", "Hook, ton coach pêche : un vieux pêcheur te fait faire le tour de l'app à la première ouverture, puis te dit quel poisson viser, à quelle heure, où et à quelle profondeur, avec quelle technique et quel leurre ou appât, et surtout pourquoi ; il compare aussi tes coins sur 7 jours.", "Mode sortie : chronomètre, écran maintenu allumé, trajet GPS, ajout d'une prise en deux touches et récapitulatif à partager en image.", "Cartes hors ligne : plan IGN et satellite enregistrés autour d'un coin, pour pêcher sans réseau.", "Règles de pêche hors ligne : tailles minimales, quotas et périodes d'ouverture en eau douce (1re et 2e catégorie) et en mer (Méditerranée, Atlantique, Manche), espèces interdites, marquage et RecFishing.", "Identification d'une prise : par indices : forme, motifs, couleurs, barbillons, lieu et saison, avec une photo.", "Prise depuis une photo : choisis une photo déjà prise : la date, l'heure et le lieu (GPS de la photo ou trajet de la sortie) remplissent la prise, avec la météo du moment.", "Partage par QR code : un coin de pêche ou une sortie (trajet et prises) se partage par QR code ou par lien ; les données voyagent dans le lien, sans serveur.", "Détecteur de touche (expérimental) : le téléphone posé contre la canne mesure les vibrations et sonne en cas de touche.", "Et aussi : calendrier lunaire, statistiques, succès à débloquer, thème clair ou sombre."], "about": [{"@type": "Thing", "name": "Pêche de loisir en France"}, {"@type": "Thing", "name": "Poissons d'eau douce et de mer"}], "audience": {"@type": "Audience", "audienceType": "Pêcheurs de loisir, en eau douce et en mer"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "HookDex France", "alternateName": "HookDex", "url": "https://hookdexfrance-code.github.io/hookdex-france/", "description": "Carnet de pêche gratuit et guide des 327 espèces pêchées en France, en eau douce et en mer : indice de pêche heure par heure, météo et marée de ton coin, règles de pêche 2026, coach qui dit où et quand pêcher, mode sortie avec trajet GPS et cartes hors ligne.", "inLanguage": "fr-FR", "applicationCategory": "SportsApplication", "applicationSubCategory": "Pêche de loisir", "operatingSystem": "Android, iOS, Windows, macOS, Linux (application web installable)", "browserRequirements": "Navigateur récent avec JavaScript", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "softwareVersion": "6.1", "image": "https://hookdexfrance-code.github.io/hookdex-france/icons/icon-512.png", "featureList": ["Carnet de pêche : espèce, taille, poids, photo, position GPS, météo automatique, technique et matériel ; sauvegarde et export JSON ou CSV.", "Le Dex : 327 espèces de France (rivière, lac, montagne, étang, Méditerranée, Atlantique, Manche, crustacés, céphalopodes, coquillages) avec habitat, tailles, période, appâts et leurres.", "Mon coin sur la carte : plan OpenStreetMap, plan et photos aériennes de l'IGN, recherche de commune, coins favoris.", "Indice de pêche de 0 à 100, heure par heure : périodes solunaires, aube et crépuscule, phase de la lune, pression, vent, pluie, orage et marée.", "Prédiction par espèce : chaque espèce a son propre modèle (ses heures, sa saison, la température et l'évolution de l'eau, la lune, la pression, le vent, le ciel, la pluie, la marée, l'état de la mer, le type et la profondeur du coin, chacun avec son poids) ; l'accueil compare les espèces en % de conditions favorables.", "Apprentissage : tes sorties terminées (même sans prise), tes prises datées et tes réponses « pris / pas pris » ajustent le modèle de chaque espèce par estimation bayésienne ; le calcul se vérifie facteur par facteur.", "Hook, ton coach pêche : un vieux pêcheur te fait faire le tour de l'app à la première ouverture, puis te dit quel poisson viser, à quelle heure, où et à quelle profondeur, avec quelle technique et quel leurre ou appât, et surtout pourquoi ; il compare aussi tes coins sur 7 jours.", "Mode sortie : chronomètre, écran maintenu allumé, trajet GPS, ajout d'une prise en deux touches et récapitulatif à partager en image.", "Cartes hors ligne : plan IGN et satellite enregistrés autour d'un coin, pour pêcher sans réseau.", "Règles de pêche hors ligne : tailles minimales, quotas et périodes d'ouverture en eau douce (1re et 2e catégorie) et en mer (Méditerranée, Atlantique, Manche), espèces interdites, marquage et RecFishing.", "Identification d'une prise : par indices : forme, motifs, couleurs, barbillons, lieu et saison, avec une photo.", "Prise depuis une photo : choisis une photo déjà prise : la date, l'heure et le lieu (GPS de la photo ou trajet de la sortie) remplissent la prise, avec la météo du moment.", "Partage par QR code : un coin de pêche ou une sortie (trajet et prises) se partage par QR code ou par lien ; les données voyagent dans le lien, sans serveur.", "Détecteur de touche (expérimental) : le téléphone posé contre la canne mesure les vibrations et sonne en cas de touche.", "Et aussi : calendrier lunaire, statistiques, succès à débloquer, thème clair ou sombre."], "about": [{"@type": "Thing", "name": "Pêche de loisir en France"}, {"@type": "Thing", "name": "Poissons d'eau douce et de mer"}], "audience": {"@type": "Audience", "audienceType": "Pêcheurs de loisir, en eau douce et en mer"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "HookDex France est-il gratuit ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui. HookDex France est gratuit, sans compte et sans publicité. Il s'utilise dans le navigateur et s'installe sur l'écran d'accueil du téléphone (Android ou iPhone) comme une application."}}, {"@type": "Question", "name": "L'application fonctionne-t-elle sans réseau ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui pour l'essentiel : carnet, Dex, règles de pêche, lune et soleil, indice de pêche et cartes enregistrées pour le hors ligne. La météo, la marée et les nouvelles cartes demandent une connexion."}}, {"@type": "Question", "name": "Comment est calculé l'indice de pêche ?", "acceptedAnswer": {"@type": "Answer", "text": "Chaque espèce a son propre modèle : pour chaque facteur (moment de la journée, saison, température et évolution de l'eau, périodes solunaires, lune, pression, vent, ciel, pluie, marée, état de la mer, type et profondeur du coin), une courbe dit ce qu'elle aime et un poids dit combien ça compte pour elle. Le résultat est un pourcentage de conditions favorables. Tes sorties terminées, tes prises datées et tes réponses « pris / pas pris » ajustent ensuite les paramètres de chaque espèce."}}, {"@type": "Question", "name": "D'où viennent les règles de pêche ?", "acceptedAnswer": {"@type": "Answer", "text": "C'est un résumé indicatif des règles nationales : Code de l'environnement pour l'eau douce, arrêté du 26 octobre 2012 modifié pour les tailles en mer, règles européennes 2026 pour le bar et le lieu jaune, obligation RecFishing 2026. L'arrêté de ton département ou de ta préfecture peut être plus strict et fait foi."}}, {"@type": "Question", "name": "Où sont enregistrées mes prises ?", "acceptedAnswer": {"@type": "Answer", "text": "Sur ton téléphone uniquement (stockage du navigateur). Tu peux télécharger une sauvegarde complète, photos et trajets compris, et la réimporter sur un autre appareil."}}, {"@type": "Question", "name": "Quelles données partent sur internet ?", "acceptedAnswer": {"@type": "Answer", "text": "Seulement si tu utilises ces fonctions : la position approximative de ton coin pour la météo et la mer (Open-Meteo), le nom de la commune (geo.api.gouv.fr) et les images de carte (OpenStreetMap, IGN)."}}, {"@type": "Question", "name": "Comment partager un coin de pêche avec un ami ?", "acceptedAnswer": {"@type": "Answer", "text": "Dans Carte, touche l'icône de partage d'un coin : un QR code s'affiche. Ton ami le scanne avec l'appareil photo de son téléphone et le coin s'ajoute à son HookDex. Les données voyagent dans le lien, sans passer par un serveur."}}]}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230A0A0A'/%3E%3Cpolygon points='18,50 58,26 90,50 58,74' fill='%23F5F5F5'/%3E%3Cpolygon points='90,50 96,38 96,62' fill='%23F5F5F5'/%3E%3Ccircle cx='40' cy='46' r='5' fill='%23FF5A36'/%3E%3C/svg%3E">
 <script data-goatcounter="https://hookdex.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -2314,6 +2336,169 @@ body.light .seg.comm-tabs button.active, body.light .seg.ig-p-tabs button.active
   .tile:active, .primary-btn:active { transform:none; }
 }
 
+/* ===================== v6.1 · « 💬 Un problème ou une idée ? » ===================== */
+/* Le formulaire (problème ou idée, message, capture d'écran), « Mes messages » et, pour les admins, les messages
+   des pêcheurs : les mêmes cartes, puces et listes que le reste du compte, en sombre comme en clair. */
+#set-retour { min-height:50px; border-radius:16px; }
+
+.retour-genres { border:0; padding:0; margin:0 0 14px; display:grid; grid-template-columns:1fr 1fr; gap:8px; min-width:0; }
+.retour-genres legend { padding:0; margin:0 0 7px; font-size:12.5px; font-weight:650; color:var(--muted); grid-column:1 / -1; }
+.retour-genre { position:relative; display:block; cursor:pointer; }
+.retour-genre input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+.retour-genre span { display:flex; align-items:center; justify-content:center; min-height:50px; padding:8px 10px; border-radius:var(--r-ctl, 14px);
+  background:var(--elev); border:1.5px solid transparent; color:var(--text); font-size:14.5px; font-weight:650; text-align:center; transition:background-color .15s ease, border-color .15s ease; }
+.retour-genre input:checked + span { border-color:var(--accent); background:var(--accent-soft); font-weight:750; }
+.retour-genre input:focus-visible + span { box-shadow:var(--ring); }
+.retour-genre:active span { background:var(--press); }
+
+.retour-compteur { text-align:right; font-size:11.5px; color:var(--muted); margin-top:-2px; font-variant-numeric:tabular-nums; }
+.retour-compteur.plein { color:var(--warn); font-weight:650; }
+
+.retour-cap { margin:0 0 12px; }
+.retour-cap-btn { display:flex; width:100%; justify-content:center; min-height:48px; border-radius:var(--r-ctl, 14px); cursor:pointer; }
+.retour-cap-btn span { color:var(--muted); font-weight:500; }
+.retour-cap-ok { display:flex; align-items:center; gap:12px; padding:10px; border-radius:var(--r-ctl, 14px); background:var(--elev); }
+.retour-cap-ok img { width:56px; height:84px; object-fit:cover; object-position:top; border-radius:10px; border:1px solid var(--line); flex-shrink:0; background:#fff; }
+.retour-cap-ok b { display:block; font-size:14px; color:var(--text); }
+.retour-cap-ok .acct-link { padding:0; min-height:36px; }
+.retour-infos { margin-top:2px; }
+.retour-infos span { color:var(--text); }
+.retour-mail { display:flex; align-items:center; justify-content:center; text-decoration:none; margin:4px 0 6px; overflow-wrap:anywhere; }
+
+.retour-filtres { display:flex; flex-wrap:wrap; margin:0 0 12px; }
+.retour-liste { display:grid; gap:10px; margin:0 0 10px; }
+.retour-item { padding:12px 12px 4px; border-radius:18px; border-color:var(--line); box-shadow:var(--shadow, none); }
+.retour-item.is-new { box-shadow:inset 3px 0 0 var(--warn), var(--shadow, none); }
+.retour-tete, .retour-auteur { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.retour-tete .comm-chip, .retour-auteur .comm-chip { margin-left:auto; flex-shrink:0; }
+.retour-genre-t { font-size:14px; font-weight:750; color:var(--text); }
+.retour-qui { min-width:0; }
+.retour-qui b { display:block; font-size:14.5px; color:var(--text); overflow-wrap:anywhere; }
+.retour-qui span { display:block; font-size:12px; color:var(--muted); }
+.retour-txt { margin:0 0 8px; font-size:14px; line-height:1.5; color:var(--text); white-space:pre-wrap; overflow-wrap:anywhere; }
+.retour-tech { margin:0 0 10px; font-size:11.5px; line-height:1.45; color:var(--muted); overflow-wrap:anywhere; }
+.retour-pied { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
+.retour-pied .acct-link { font-size:12.5px; padding:0; }
+.retour-cap-admin { margin:0 0 10px; }
+.retour-cap-admin .small-btn { width:100%; justify-content:center; min-height:44px; }
+.retour-cap-admin img { display:block; width:100%; max-height:360px; object-fit:contain; object-position:top; border-radius:12px; border:1px solid var(--line);
+  background:var(--elev); cursor:zoom-in; }
+.retour-cap-admin img.grand { max-height:none; cursor:zoom-out; }
+.retour-item .comm-modo-acts { padding:0 0 10px; }
+.retour-item .comm-modo-acts .small-btn { min-height:44px; flex:1 1 auto; white-space:nowrap; padding:0 10px; }
+@media (prefers-reduced-motion: reduce) { .retour-genre span { transition:none; } }
+
+/* ===================== v6.1 · les navigateurs qui assombrissent d'office ===================== */
+/* Certains navigateurs (ceux intégrés aux applis, Samsung Internet en mode sombre, Chrome avec « thème sombre pour les
+   sites ») assombrissent eux-mêmes les pages : les boutons orange devenaient bordeaux, l'anneau de l'indice bleu nuit.
+   HookDex dit qu'il a déjà son propre thème sombre (balise color-scheme, dans l'en-tête), et que son thème clair doit
+   rester clair (« only light ») : ceux qui respectent ces signaux ne repeignent plus rien. Pour ceux qui assombrissent
+   quand même, voir navAssombri (30_assombri.js). */
+body.light { color-scheme:light; color-scheme:only light; }
+/* la phrase sous « 🎨 Apparence », seulement dans ces navigateurs */
+.theme-force { margin:-12px 2px 20px; font-size:12.5px; line-height:1.45; color:var(--muted); }
+
+/* ===================== v6.1 · le zoom (idées de Ben n° 1, 2 et 3) ===================== */
+/* 1. On zoome à deux doigts, mais le double appui ne zoome pas la page (« deux appuis = j'aime », boutons tapés
+      vite) ; les cartes et le graphique des heures gardent leurs propres gestes (leurs styles l'emportent). */
+html { touch-action:manipulation; }
+/* sur iPhone et iPad, une case écrite en moins de 16 points fait grossir l'écran tout seul quand on la touche */
+@supports (-webkit-touch-callout: none) {
+  input[type=text], input[type=search], input[type=email], input[type=password], input[type=number], input[type=tel], input[type=url],
+  input[type=time], input[type=date], input[type=datetime-local], input[type=month], input[type=week], input:not([type]), select, textarea { font-size:16px !important; }
+  .stepper input { font-size:20px !important; }
+}
+
+/* 2. la photo en grand, avec zoom (30_zoom.js : pvOuvrir, pvGestes) */
+.comm-photo-ov.pv { padding:62px 8px 48px; background:rgba(0,0,0,0.94); touch-action:none; overscroll-behavior:contain;
+  -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+.comm-photo-ov.pv img { transform-origin:0 0; will-change:transform; -webkit-user-drag:none; cursor:zoom-in; border-radius:6px; }
+.comm-photo-ov.pv.pv-zoom img { cursor:grab; border-radius:0; }
+.comm-photo-ov.pv.pv-zoom img:active { cursor:grabbing; }
+.comm-photo-ov.pv .round-btn { top:max(12px, env(safe-area-inset-top)); }
+.pv-aide { position:absolute; left:16px; right:16px; bottom:max(14px, env(safe-area-inset-bottom)); margin:0; text-align:center;
+  color:rgba(255,255,255,0.82); font-size:13px; line-height:1.35; pointer-events:none; animation:pv-aide 3.4s ease forwards; }
+.pv-aide.pv-vu { animation:none; opacity:0; transition:opacity .25s; }
+@keyframes pv-aide { 0%, 72% { opacity:1; } 100% { opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .pv-aide { animation:none; } }
+/* Carnet : la photo d'une prise est un bouton (elle s'ouvre en grand), avec une petite loupe dans le coin */
+.catch-photo-btn { display:block; position:relative; width:100%; margin:0; padding:0; border:0; background:none; color:inherit;
+  border-radius:14px; cursor:zoom-in; -webkit-tap-highlight-color:transparent; }
+.catch-photo-btn img { display:block; }
+.catch-photo-btn::after { content:""; position:absolute; right:8px; bottom:8px; width:30px; height:30px; border-radius:50%;
+  background:rgba(5,9,12,0.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6'/%3E%3Cpath d='M15 15l5 5M10.5 8v5M8 10.5h5'/%3E%3C/svg%3E") center / 18px 18px no-repeat;
+  pointer-events:none; }
+.catch-photo-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.catch-photo-btn:active img { filter:brightness(0.92); }
+
+/* 3. la taille du texte (Paramètres → Apparence) */
+.set-sub { margin:2px 2px 10px; font-size:14px; font-weight:700; color:var(--text); }
+.texte-row { display:flex; gap:8px; margin-bottom:10px; }
+.texte-row .small-btn { flex:1; min-width:0; justify-content:center; align-items:center; min-height:46px; padding:8px 6px; border-radius:14px;
+  border:1.5px solid transparent !important; background:var(--elev); color:var(--muted) !important; font-weight:650; line-height:1.15; text-align:center; }
+.texte-row .small-btn[aria-pressed="true"] { border-color:var(--accent) !important; color:var(--text) !important; background:var(--accent-soft); font-weight:750; }
+.texte-l { display:inline-flex; align-items:baseline; justify-content:center; flex-wrap:wrap; gap:0 5px; min-width:0; }
+.texte-a { font-weight:800; line-height:1; }
+.texte-note { margin:0 2px 20px; font-size:12.5px; line-height:1.45; color:var(--muted); }
+/* … et les écrans plus étroits qui vont avec (Grand : 313 à 358 points de large ; Très grand : 280 à 317 ; ou un petit
+   téléphone) : rien ne doit dépasser ni être coupé (vérifié écran par écran : t35_v61_zoom.py) */
+/* la Communauté : le titre rapetisse (puis, en dernier recours, se termine par « … ») plutôt que de pousser ses 3 boutons hors de l'écran */
+.ig-brand { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ig-head-acts { flex-shrink:0; }
+/* les classements des défis : une ligne ne dépasse jamais de sa carte (le nom se termine par « … » s'il est trop long) */
+.defi-pod { grid-template-columns:minmax(0, 1fr); }
+@media (max-width: 379px) {
+  .ig-brand { font-size:26px; }
+}
+@media (max-width: 339px) {
+  /* Carnet : les 4 boutons d'une prise passent sous son nom quand il n'y a pas la place à côté */
+  .catch-card > div:first-child { flex-wrap:wrap; column-gap:6px; }
+  .catch-card > div:first-child > .catch-actions { margin-left:auto; }
+  .ig-brand { font-size:22px; }
+  .ig-head-acts { gap:4px; }
+  .ig-round { width:38px; height:38px; }
+  .ig-me { width:40px; height:40px; }
+}
+@media (max-width: 329px) {
+  /* le formulaire d'une prise : une case par ligne (date, puis heure ; taille, puis poids…) */
+  .form-grid { grid-template-columns:minmax(0, 1fr); }
+}
+@media (max-width: 319px) {
+  /* le calendrier : 7 colonnes qui se partagent la largeur */
+  .cal-grid, .week-row { grid-template-columns:repeat(7, minmax(0, 1fr)); gap:3px; }
+  .cal-day { min-width:0; border-radius:10px; font-size:13px; }
+  .cal-day .cal-moon { font-size:10px; }
+  .cal-day .cal-star { top:1px; right:2px; font-size:8px; }
+  .cal-weekday { min-width:0; letter-spacing:0; font-size:9.5px; overflow:hidden; text-overflow:clip; }
+}
+@media (max-width: 300px) {
+  .ig-brand { font-size:18px; }
+  /* le Dex : 2 espèces par ligne (des cartes plus grandes) */
+  .dex-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  /* les prises par mois : 12 colonnes qui se partagent la largeur */
+  .bar-chart { gap:2px; }
+  .bar-chart .bar-col { min-width:0; }
+  .bar-chart .bar-label { width:100%; display:flex; justify-content:center; white-space:nowrap; font-size:8.5px; letter-spacing:-0.02em; }
+}
+
+/* ===================== v6.1 · LA SAUVEGARDE EN LIGNE ===================== */
+.svg-card { margin-bottom:10px; font-size:13px; line-height:1.55; color:var(--muted); display:grid; gap:8px; }
+.svg-card p { margin:0; }
+.svg-titre { display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--text); font-size:14.5px; }
+.svg-ligne { margin:0; }
+.svg-doux { font-size:12.5px; }
+.svg-err { color:var(--warn); }
+.svg-box { border:1px solid var(--line, rgba(127,127,127,0.25)); border-radius:14px; padding:12px 14px; display:grid; gap:6px; font-size:13px; line-height:1.5; color:var(--muted); margin:0 0 12px; }
+.svg-card .svg-box { margin:0; }
+.svg-box b { color:var(--text); font-size:14px; }
+.svg-box p { margin:0; }
+.svg-box .btn-row { margin-top:4px; flex-wrap:wrap; }
+.svg-alerte { border-color:var(--warn); background:var(--warn-soft); }
+.small-btn.svg-ok { color:var(--accent); border-color:var(--accent); }
+.small-btn.svg-danger { color:var(--danger); border-color:var(--danger-border, var(--danger)); }
+.svg-plus-tard { font-size:12px; text-decoration:underline; }
+#svg-accueil:empty { display:none; }
+
 </style>
 </head>
 <body>
@@ -2326,7 +2511,23 @@ body.light .seg.comm-tabs button.active, body.light .seg.ig-p-tabs button.active
   <div class="splash-title">HookDex France</div>
   <div class="splash-sub">Chargement du carnet…</div>
 </div>
-<script>window.fdxEcranVu = performance.now();</script>
+<script>window.fdxEcranVu = performance.now();
+// v6.1 : un navigateur qui assombrit d'office toutes les pages, même celles qui ont déjà leur thème sombre (voir
+// navAssombri) : un carré qui demande « seulement le thème clair » y reçoit quand même le fond sombre du navigateur
+function fdxSombreForce() {
+  try {
+    if (window.matchMedia && window.matchMedia("(forced-colors: active)").matches) return false;
+    var d = document.createElement("div");
+    d.style.cssText = "position:absolute;left:-99px;top:0;width:1px;height:1px;pointer-events:none;"
+      + "color-scheme:light;color-scheme:only light;background-color:#fff;background-color:Canvas";
+    (document.body || document.documentElement).appendChild(d);
+    var m = /rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)(?:[\s,/]+([\d.]+%?))?/.exec(getComputedStyle(d).backgroundColor || "");
+    d.parentNode.removeChild(d);
+    var opaque = m && (m[4] === undefined || parseFloat(m[4]) >= (m[4].slice(-1) === "%" ? 99 : 0.99));
+    return !!opaque && +m[1] + +m[2] + +m[3] < 300;
+  } catch (e) { return false; }
+}
+if (fdxSombreForce()) document.body.className = "light";</script>
 <div id="app"><div class="seo">
 <h1>HookDex France : carnet de pêche et guide des 327 espèces de France</h1>
 <p>Carnet de pêche gratuit et guide des 327 espèces pêchées en France, en eau douce et en mer : indice de pêche heure par heure, météo et marée de ton coin, règles de pêche 2026, coach qui dit où et quand pêcher, mode sortie avec trajet GPS et cartes hors ligne.</p>
@@ -3456,12 +3657,12 @@ function alertStorageFull() {
   alert("Mémoire de l'app pleine : impossible d'enregistrer. Ce qui était déjà enregistré n'est pas touché.\n\nTélécharge une sauvegarde (⚙️ Paramètres → Télécharger une sauvegarde complète), puis supprime d'anciennes prises pour libérer de la place.");
 }
 function saveCatches(arr) {
-  if (lsSet("fdx_catches", JSON.stringify(arr))) { bumpRev(); scheduleLearn(); if (typeof commSchedule === "function") commSchedule(2500); return true; }
+  if (lsSet("fdx_catches", JSON.stringify(arr))) { bumpRev(); scheduleLearn(); if (typeof commSchedule === "function") commSchedule(2500); if (typeof svgSchedule === "function") svgSchedule(); return true; }
   alertStorageFull(); return false;
 }
 function loadSessions() { return safeLoadArray("fdx_sessions"); }
 function saveSessions(arr) {
-  if (lsSet("fdx_sessions", JSON.stringify(arr))) { bumpRev(); scheduleLearn(); return true; }
+  if (lsSet("fdx_sessions", JSON.stringify(arr))) { bumpRev(); scheduleLearn(); if (typeof svgSchedule === "function") svgSchedule(); return true; }
   alertStorageFull(); return false;
 }
 function loadActiveSession() { try { const v = JSON.parse(localStorage.getItem("fdx_active_session") || "null"); return v && typeof v === "object" && !Array.isArray(v) ? v : null; } catch(e) { return null; } }
@@ -3475,6 +3676,7 @@ function saveActiveSession(s) {
 }
 function loadTheme() { return localStorage.getItem("fdx_theme") || "dark"; }
 function resolveTheme() {
+  if (navAssombri()) return "light"; // v6.1 : ce navigateur assombrit lui-même toutes les pages (voir navAssombri)
   if (state.theme === "auto") {
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
@@ -3514,12 +3716,15 @@ const PhotoDB = (() => {
   return {
     ok: () => open().then(() => true, () => false),
     get: (id) => run("readonly", (store, done) => { const r = store.get(String(id)); r.onsuccess = () => done(r.result || null); }),
-    put: (id, data) => run("readwrite", (store) => { store.put(data, String(id)); }),
-    putMany: (entries) => run("readwrite", (store) => { entries.forEach(([id, data]) => store.put(data, String(id))); }),
+    put: (id, data) => run("readwrite", (store) => { store.put(data, String(id)); }).then((r) => { photoModifiee(id); return r; }),
+    putMany: (entries) => run("readwrite", (store) => { entries.forEach(([id, data]) => store.put(data, String(id))); }).then((r) => { entries.forEach(([id]) => photoModifiee(id)); return r; }),
+    keys: () => run("readonly", (store, done) => { const r = store.getAllKeys(); r.onsuccess = () => done(new Set((r.result || []).map(String))); }),
     del: (id) => run("readwrite", (store) => { store.delete(String(id)); }),
     clear: () => run("readwrite", (store) => { store.clear(); }),
   };
 })();
+// v6.1 : une photo (ou une trace) enregistrée : la sauvegarde en ligne l'enverra
+function photoModifiee(id) { try { if (typeof svgPhotoModifiee === "function") svgPhotoModifiee(id); } catch (e) {} }
 let photoDbReady = false;
 PhotoDB.ok().then((ok) => { photoDbReady = ok; });
 const photoCache = new Map();
@@ -4107,6 +4312,7 @@ function renderAccueil() {
       <div style="text-align:right; margin-top:6px;"><button class="icon-btn-flat" id="dismiss-install" style="font-size:11px; text-decoration:underline;">Compris</button></div>
     </div>`}
     ${renderAddressWarning()}
+    ${svgCartesAccueil()}
     ${renderBackupReminder()}
     ${renderHeroCard()}
     ${renderCoachCard()}
@@ -4417,12 +4623,14 @@ function renderBackupReminder() {
   if (state.catches.length < 3) return "";
   const days = lastBackupDays();
   if (days !== null && days < backupEveryDays()) return "";
+  if (svgRecente() && (days === null || days < 60)) return ""; // v6.1 : la sauvegarde en ligne protège déjà le carnet
   if (Date.now() < parseInt(localStorage.getItem("fdx_backup_snooze") || "0", 10)) return "";
   return `
     <div class="card backup-card">
       <b style="color:var(--accent);">💾 Pense à sauvegarder ton carnet</b><br>
       ${days === null ? "Tu n'as encore jamais fait de sauvegarde." : `Dernière sauvegarde il y a ${days} jours.`}
-      Tes ${state.catches.length} prises ne sont stockées que sur ce téléphone : une copie te protège en cas de perte ou de changement d'appareil.${safariMayErase() ? " Sur iPhone, le navigateur peut effacer les données d'un site qui n'a pas été ouvert depuis 7 jours : installe HookDex sur l'écran d'accueil pour les garder." : ""}
+      ${svgActive() ? "Ta sauvegarde en ligne te protège déjà : un fichier sur Drive en plus, c'est une deuxième sécurité." : `Tes ${state.catches.length} prises ne sont stockées que sur ce téléphone : une copie te protège en cas de perte ou de changement d'appareil.`}${safariMayErase() ? " Sur iPhone, le navigateur peut effacer les données d'un site qui n'a pas été ouvert depuis 7 jours : installe HookDex sur l'écran d'accueil pour les garder." : ""}
+      ${acctConfigured() && !acctSession() ? `<div style="margin-top:6px;">☁️ Ou crée un compte HookDex (gratuit) et active la <b>sauvegarde en ligne</b> (⚙️ Paramètres) : ton carnet et tes photos sont copiés tout seuls, en privé.</div>` : ""}
       <div class="btn-row">
         <button class="small-btn" id="btn-backup-download" style="color:var(--accent); border-color:var(--accent);">⬇️ Télécharger</button>
         ${navigator.canShare ? `<button class="small-btn" id="btn-backup-share">📤 Envoyer (Drive, mail…)</button>` : ""}
@@ -4721,7 +4929,7 @@ function renderCatchCard(c, nested) {
             <button class="icon-btn-flat" data-remove="${c.id}" aria-label="Supprimer cette prise">🗑️</button>
           </div>
         </div>
-        ${photoImgTag(c)}
+        ${photoBoutonHtml(c)}
         <div class="catch-meta">${metaFields}</div>
         ${c.lat ? `<a href="https://www.google.com/maps?q=${c.lat},${c.lng}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--accent); margin:-2px 0 -10px; padding:10px 14px 10px 0; text-decoration:none;">📍 Voir sur la carte ↗</a>` : ""}
         ${techLine ? `<div style="font-size:12.5px; color:var(--muted); margin-top:8px;">${techLine}</div>` : ""}
@@ -5004,12 +5212,15 @@ function renderSettingsModal() {
           <button class="small-btn" id="set-theme-light" style="flex:1; justify-content:center; ${state.theme === "light" ? "border-color:var(--accent); color:var(--accent);" : ""}">☀️ Clair</button>
           <button class="small-btn" id="set-theme-auto" style="flex:1; justify-content:center; ${state.theme === "auto" ? "border-color:var(--accent); color:var(--accent);" : ""}">🌗 Auto</button>
         </div>
+        ${navAssombri() ? `<p class="theme-force">🌓 Ce navigateur assombrit lui-même toutes les pages : HookDex lui donne son thème clair, qu'il transforme en sombre. Pour choisir toi-même le thème, coupe ce mode sombre dans le navigateur, ou ouvre HookDex dans Chrome.</p>` : ""}
+        ${texteReglageHtml()}
 
         ${renderAccountSection()}
         <div class="section-title">🎣 Hook, ton coach</div>
         <button class="small-btn" id="set-tuto" style="width:100%; justify-content:center; margin-bottom:20px;">▶️ Revoir le tutoriel avec Hook</button>
 
         <div class="section-title">💾 Données et sauvegarde</div>
+        ${svgCarteParametres()}
         <div class="card" id="storage-card" style="margin-bottom:10px; font-size:12.5px; color:var(--muted); line-height:1.5;">Calcul de l'espace utilisé…</div>
         <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
           <button class="small-btn" id="set-export" style="justify-content:center; color:var(--accent); border-color:var(--accent);">⬇️ Télécharger une sauvegarde complète (JSON, photos comprises)</button>
@@ -5034,6 +5245,9 @@ function renderSettingsModal() {
           <div style="margin-top:12px;">Météo : <b style="color:var(--text);">${weatherEnabled() ? "activée" : "désactivée"}</b>. Quand elle est active, la position est envoyée à Open-Meteo (arrondie à ~10 km pour la météo, ~1 km pour la mer). Le nom de la commune est demandé au service public geo.api.gouv.fr.</div>
           <div class="btn-row"><button class="small-btn" id="set-weather-toggle">${weatherEnabled() ? "Désactiver la météo" : "☁️ Activer la météo"}</button></div>
         </div>
+
+        <div class="section-title">💬 Un problème ou une idée ?</div>
+        <button class="small-btn" id="set-retour" style="width:100%; justify-content:center; margin-bottom:20px;">✏️ Écrire à l'équipe HookDex</button>
 
         <div class="section-title">ℹ️ À propos</div>
         <div class="card" style="font-size:13px; color:var(--muted); line-height:1.6;">
@@ -5060,6 +5274,7 @@ function attachSettingsHandlers() {
   if (lightBtn) lightBtn.onclick = () => { state.theme = "light"; saveTheme("light"); render(); };
   const autoBtn = document.getElementById("set-theme-auto");
   if (autoBtn) autoBtn.onclick = () => { state.theme = "auto"; saveTheme("auto"); render(); };
+  texteReglageBind();
   const exportBtn = document.getElementById("set-export");
   if (exportBtn) exportBtn.onclick = exportData;
   const exportCsvBtnSettings = document.getElementById("set-export-csv");
@@ -5079,6 +5294,8 @@ function attachSettingsHandlers() {
   updateStorageCard();
   updateAppStatus();
   attachAccountHandlers();
+  const setRetour = document.getElementById("set-retour");
+  if (setRetour) setRetour.onclick = retourOuvrir;
   const forceUpdate = document.getElementById("set-force-update");
   if (forceUpdate) forceUpdate.onclick = async () => {
     forceUpdate.textContent = "Recherche de la dernière version…";
@@ -5095,7 +5312,7 @@ function attachSettingsHandlers() {
   };
   const clearBtn = document.getElementById("set-clear");
   if (clearBtn) clearBtn.onclick = () => {
-    if (confirm(`Effacer définitivement ${state.catches.length > 1 ? `tes ${state.catches.length} prises enregistrées` : "ta prise enregistrée"} et ${state.catches.length > 1 ? "leurs photos" : "sa photo"} ? C'est irréversible.${lastBackupDays() === null ? "\n\nTu n'as encore jamais téléchargé de sauvegarde : fais-en une avant !" : ` Dernière sauvegarde : ${lastBackupLabel()}.`}${commClearNote()}`)) {
+    if (confirm(`Effacer définitivement ${state.catches.length > 1 ? `tes ${state.catches.length} prises enregistrées` : "ta prise enregistrée"} et ${state.catches.length > 1 ? "leurs photos" : "sa photo"} ? C'est irréversible.${lastBackupDays() === null ? "\n\nTu n'as encore jamais téléchargé de sauvegarde : fais-en une avant !" : ` Dernière sauvegarde : ${lastBackupLabel()}.`}${commClearNote()}${svgActive() ? "\n\nTa sauvegarde en ligne en garde une copie : HookDex te proposera de les remettre, ou de les retirer aussi de ta sauvegarde." : ""}`)) {
       commClearAll();
       state.catches = [];
       saveCatches(state.catches);
@@ -5399,6 +5616,7 @@ function attachMainHandlers() {
       const index = state.catches.indexOf(c);
       state.catches = state.catches.filter((x) => x.id !== c.id);
       commMarkDeleted(c.id);
+      svgNoteSuppr(c.id);
       saveCatches(state.catches);
       renderMain();
       checkNewAchievements();
@@ -5432,6 +5650,7 @@ function attachMainHandlers() {
       state.sessions = state.sessions.filter((s) => s.id !== sid);
       saveSessions(state.sessions);
       PhotoDB.del(trackKey(sid)).catch(() => {});
+      svgNoteSupprSortie(sid);
       state.catches = state.catches.map((c) => (c.sessionId === sid ? { ...c, sessionId: null } : c));
       saveCatches(state.catches);
       renderMain();
@@ -5934,6 +6153,25 @@ function importData(e) {
       return { ...rest, hasTrack: true };
     });
     const dupSessions = goodSessions.length - newSessions.length;
+    // v6.1 : une prise déjà là dont la photo a disparu du téléphone la retrouve, sans rien changer d'autre
+    let photosRemises = 0, tracesRemises = 0;
+    try {
+      const cles = await PhotoDB.keys();
+      const ici = new Map(state.catches.map((c) => [String(c.id), c]));
+      for (const c of goodCatches) {
+        const l = ici.get(c.id);
+        if (!l || !l.hasPhoto || l.photo || cles.has(c.id) || typeof c.photo !== "string" || !c.photo.startsWith("data:image/")) continue;
+        await PhotoDB.put(c.id, c.photo);
+        if ((await PhotoDB.get(c.id)) === c.photo) { cachePhoto(c.id, c.photo); forgetPhotoUrl(c.id); photosRemises++; cles.add(c.id); }
+      }
+      const iciS = new Map(state.sessions.map((x) => [String(x.id), x]));
+      for (const x of goodSessions) {
+        const l = iciS.get(x.id);
+        if (!l || !l.hasTrack || cles.has(trackKey(x.id)) || !Array.isArray(x.track) || x.track.length < 2) continue;
+        await PhotoDB.put(trackKey(x.id), { v: 1, pts: x.track });
+        tracesRemises++; cles.add(trackKey(x.id));
+      }
+    } catch (err) {}
     try { newCatches = stripMovedPhotos(newCatches, await movePhotosToDb(newCatches)); } catch (err) {}
     const prevCatches = state.catches, prevSessions = state.sessions;
     if (newCatches.length) {
@@ -5985,7 +6223,10 @@ function importData(e) {
     if (dupCatches) lines.push(`• ${plurFr(dupCatches, "prise")} déjà présente${e1(dupCatches)} (ignorée${e1(dupCatches)})`);
     if (dupSessions) lines.push(`• ${plurFr(dupSessions, "sortie")} déjà présente${e1(dupSessions)} (ignorée${e1(dupSessions)})`);
     if (unreadable) lines.push(`• ${plurFr(unreadable, "élément")} illisible${e1(unreadable)} (ignoré${e1(unreadable)})`);
-    const added = newCatches.length + savedSessions + addedSpots + addedObs;
+    if (photosRemises) lines.unshift(`• ${plurFr(photosRemises, "photo")} remise${e1(photosRemises)} sur ${photosRemises > 1 ? "des prises déjà là" : "une prise déjà là"} (elle${e1(photosRemises)} avai${photosRemises > 1 ? "ent" : "t"} disparu du téléphone)`);
+    if (tracesRemises) lines.unshift(`• ${plurFr(tracesRemises, "trace GPS")} remise${e1(tracesRemises)} sur ${tracesRemises > 1 ? "des sorties déjà là" : "une sortie déjà là"}`);
+    if (photosRemises || tracesRemises) setTimeout(() => { if (typeof svgReparer === "function") svgReparer().catch(() => {}); }, 300);
+    const added = newCatches.length + savedSessions + addedSpots + addedObs + photosRemises + tracesRemises;
     alert((added ? "Import terminé ✓" : "Rien de nouveau : tout ce que contient ce fichier est déjà dans ton carnet.") + (lines.length ? "\n\n" + lines.join("\n") : ""));
   };
   reader.onerror = () => alert("Impossible de lire ce fichier.");
@@ -6232,7 +6473,7 @@ async function shareCatchCard(id) {
 }
 
 /* ---------- mise à jour de l'app ---------- */
-const APP_VERSION = "6.0";
+const APP_VERSION = "6.1";
 function checkForUpdate() {
   if (location.protocol === "file:" || navigator.onLine === false) return;
   // requête HEAD : ignorée par le service worker, elle interroge toujours GitHub
@@ -6425,7 +6666,7 @@ function loadSpots() {
 }
 function saveSpots(list) {
   spotsVer++;
-  if (lsSet("fdx_spots", JSON.stringify(list))) { if (typeof commSchedule === "function") commSchedule(2500); return true; }
+  if (lsSet("fdx_spots", JSON.stringify(list))) { if (typeof commSchedule === "function") commSchedule(2500); if (typeof svgSchedule === "function") svgSchedule(); return true; }
   showSnackbar("Mémoire pleine : impossible d'enregistrer ce coin"); return false;
 }
 function addSpot(s) {
@@ -8743,7 +8984,10 @@ function renderUnsafe() {
     </nav>
   `;
   document.body.className = resolveTheme() === "light" ? "light" : "";
-  { const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", resolveTheme() === "light" ? "#F2F5F8" : "#0B1117"); }
+  { const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", resolveTheme() === "light" && !navAssombri() ? "#F2F5F8" : "#0B1117"); }
+  { const clair = resolveTheme() === "light", r = document.documentElement.style, cs = document.querySelector('meta[name="color-scheme"]');
+    r.colorScheme = clair ? "light" : "dark"; if (clair) r.colorScheme = "only light";
+    if (cs) cs.setAttribute("content", clair ? "only light" : "dark light"); }
   document.getElementById("settings-btn").onclick = () => { state.showSettings = true; render(); };
   document.getElementById("place-chip").onclick = () => openPicker("place");
   document.getElementById("nav-fab").onclick = () => { state.sheet = "fab"; render(); };
@@ -8841,6 +9085,7 @@ function attachSheetHandlers() {
       if (act === "bite") { render(); openBite(); return; }
       if (act === "place") { render(); openPicker("place"); return; }
       if (act === "settings") { state.showSettings = true; render(); return; }
+      if (act === "theme" && navAssombri()) { render(); showSnackbar("🌓 Ce navigateur assombrit lui-même les pages : c'est lui qui choisit les couleurs ici. Dans Chrome, HookDex suit ton thème.", null, null, 8000); return; }
       if (act === "theme") { state.theme = resolveTheme() === "dark" ? "light" : "dark"; saveTheme(state.theme); render(); return; }
       if (act === "share-backup") { render(); shareBackup(); return; }
       if (act === "session") {
@@ -10091,6 +10336,7 @@ function undoQuickCatch(id) {
   const c = state.catches.find((x) => x.id === id);
   if (!c) return;
   state.catches = state.catches.filter((x) => x.id !== id);
+  svgNoteSuppr(id);
   saveCatches(state.catches);
   if (c.hasPhoto) { PhotoDB.del(id).catch(() => {}); photoCache.delete(String(id)); forgetPhotoUrl(id); }
   if (document.getElementById("sess")) renderSessDynamic(); else renderMain();
@@ -11727,7 +11973,7 @@ window.addEventListener("pageshow", (e) => { if (e.persisted) syncFromOtherTab(f
 
 /* ---------- sauvegarde : rappel plus fréquent dans Safari sur iPhone ---------- */
 function safariMayErase() { return isIosDevice() && !isStandaloneApp(); }
-function backupEveryDays() { return safariMayErase() ? 7 : 30; }
+function backupEveryDays() { return safariMayErase() || (stockageProtege === false && !svgRecente()) ? 7 : 30; }
 
 /* ---------- accessibilité : chaque champ a un nom lu par les lecteurs d'écran ---------- */
 const A11Y_LABELS = { "dex-search": "Rechercher dans le Dex", "journal-search": "Rechercher dans le journal", "f-espece-search": "Rechercher une espèce",
@@ -12096,6 +12342,7 @@ function quickDelete(q) {
   state.catches = state.catches.filter((x) => x.id !== c.id);
   if (!saveCatches(state.catches)) { state.catches = prev; return; }
   commMarkDeleted(c.id);
+  svgNoteSuppr(c.id);
   closeQuickAdd();
   const redraw = () => { if (document.getElementById("sess")) renderSessDynamic(); else renderMain(); };
   redraw();
@@ -12619,7 +12866,7 @@ function learnedTheta(key) {
 /* ---------- les observations ---------- */
 function loadObs() { return safeLoadArray("fdx_obs"); }
 function saveObs(arr) {
-  if (lsSet("fdx_obs", JSON.stringify(arr.slice(0, 1500)))) { bumpRev(); scheduleLearn(); return true; }
+  if (lsSet("fdx_obs", JSON.stringify(arr.slice(0, 1500)))) { bumpRev(); scheduleLearn(); if (typeof svgSchedule === "function") svgSchedule(); return true; }
   alertStorageFull(); return false;
 }
 function addObs(o) { const list = loadObs(); list.unshift(o); return saveObs(list); }
@@ -14172,7 +14419,7 @@ function acctStart() {
   if (!acctConfigured()) return;
   if (acctCallback) { const p = acctCallback; acctCallback = null; acctHandleCallback(p); return; }
   // déjà connecté : le rôle est relu en arrière-plan (un admin a pu le changer)
-  if (acctSession()) setTimeout(() => { if (navigator.onLine !== false) acctLoadProfil().then(acctRefreshUi).catch(() => {}); }, 3000);
+  if (acctSession()) setTimeout(() => { if (navigator.onLine !== false) acctLoadProfil().then(() => { acctRefreshUi(); pushAdminMessages(); }).catch(() => {}); }, 3000);
   if (acctSession()) {
     setTimeout(() => { reglagesCharger(false).catch(() => {}); }, 1500); // sans compte : rien n'est demandé au serveur
     setTimeout(pushVerifier, 8000);
@@ -14184,7 +14431,7 @@ function acctStart() {
 function acctAboutTap() {}
 function acctAboutText() {
   return acctVisible()
-    ? "Ton carnet (prises, sorties, coins, photos) reste stocké sur cet appareil. Si tu crées un compte HookDex (facultatif), ton e-mail et ton pseudo sont enregistrés sur le serveur HookDex (Supabase, serveurs en Europe), ainsi que les prises, coins et photos que tu choisis de partager."
+    ? `Ton carnet (prises, sorties, coins, photos) reste stocké sur cet appareil${svgActive() ? ", avec une copie privée sur le serveur HookDex (sauvegarde en ligne, lisible par toi seul)" : ""}. Si tu crées un compte HookDex (facultatif), ton e-mail et ton pseudo sont enregistrés sur le serveur HookDex (Supabase, serveurs en Europe), ainsi que les prises, coins et photos que tu choisis de partager.`
     : "Toutes tes données restent stockées uniquement sur cet appareil.";
 }
 
@@ -14325,7 +14572,7 @@ function acctViewHtml(view, d) {
         ${acctBack("compte", "← Retour")}`;
     case "supprimer":
       return `<h3>Supprimer mon compte</h3>
-        <p class="acct-intro">Ton compte HookDex et tout ce qu'il contient sur le serveur (pseudo, e-mail, prises et coins partagés, photos) seront <b>définitivement effacés</b>. Ton carnet sur ce téléphone n'est pas touché.</p>
+        <p class="acct-intro">Ton compte HookDex et tout ce qu'il contient sur le serveur (pseudo, e-mail, prises et coins partagés, photos, messages) seront <b>définitivement effacés</b>. Ton carnet sur ce téléphone n'est pas touché.</p>
         <form id="acct-form" novalidate>
           <div class="field"><label for="acct-confirm">Pour confirmer, écris SUPPRIMER</label><input id="acct-confirm" autocomplete="off" autocapitalize="characters" spellcheck="false" required></div>
           ${acctErr}
@@ -14344,6 +14591,17 @@ function acctViewHtml(view, d) {
     case "serveur":
       if (!s) return acctViewHtml("connexion", d);
       return acctServeurHtml();
+    case "retour":
+      if (!s) return acctRetourSansCompteHtml();
+      return acctRetourHtml(d);
+    case "retour-sans-compte":
+      return acctRetourSansCompteHtml();
+    case "mes-retours":
+      if (!s) return acctViewHtml("connexion", d);
+      return acctMesRetoursHtml(d);
+    case "retours":
+      if (!s) return acctViewHtml("connexion", d);
+      return acctRetoursAdminHtml(d);
     case "compte":
     default: {
       if (!s) return acctViewHtml("connexion", d);
@@ -14356,7 +14614,7 @@ function acctViewHtml(view, d) {
         ${p ? acctRoleCard(role) : `<p class="acct-small" id="acct-offline">Profil pas encore chargé (hors ligne ?).</p>`}
         ${modo ? `<div class="acct-modo">🛡️ Modération : <b>${plurFr(p.a_verifier || 0, "prise")}</b> à vérifier · <b>${plurFr(p.signalements_ouverts || 0, "signalement")}</b> ouvert${(p.signalements_ouverts || 0) > 1 ? "s" : ""}.</div>` : ""}
         ${commAccountButtons(modo, p)}
-        ${role === "admin" ? `<div class="acct-list acct-admin"><button type="button" data-acct-view="admin">👑 Gérer les comptes et les rôles</button><button class="comm-acct-btn" type="button" data-acct-view="serveur">⚙️ Réglages du serveur</button></div>` : ""}
+        ${role === "admin" ? `<div class="acct-list acct-admin"><button type="button" data-acct-view="admin">👑 Gérer les comptes et les rôles</button><button class="comm-acct-btn" type="button" data-acct-view="retours">💬 Messages des pêcheurs${retoursBadge(p)}</button><button class="comm-acct-btn" type="button" data-acct-view="serveur">⚙️ Réglages du serveur</button></div>` : ""}
         <div class="acct-actions">
           <button class="small-btn" type="button" data-acct-view="pseudo">✏️ Changer de pseudo</button>
           <button class="small-btn" type="button" data-acct-view="mdp">🔑 Changer le mot de passe</button>
@@ -14393,6 +14651,7 @@ function acctOpen(view, data) {
   acctCaptchaPoser();
   if (view === "notifs") acctNotifsBind();
   if (view === "serveur") acctServeurEtat();
+  retourApresOuverture(view);
   const first = body.querySelector("input:not([type=hidden])");
   setTimeout(() => {
     if (!document.getElementById("acct")) return;
@@ -14461,6 +14720,7 @@ function acctBind(view, d) {
 }
 async function acctSubmit(view, d) {
   if (view === "serveur") return acctServeurEnregistrer();
+  if (view === "retour") return retourEnvoyer();
   const email = acctVal("acct-email").trim();
   const mdp = acctVal("acct-mdp");
   if (view === "inscription") {
@@ -14497,6 +14757,7 @@ async function acctSubmit(view, d) {
       try { p = await acctLoadProfil(); } catch (e) {}
       acctRefreshUi();
       commPull(true);
+      svgApresConnexion().then(() => svgReparer()).catch(() => {});
       acctOpen("compte", { info: p ? `Connecté ✓ Bonjour ${p.pseudo} !` : "Connecté ✓" });
     });
   }
@@ -14808,7 +15069,7 @@ function commErr(e) {
   const c = (e && e.code) || "";
   if (/^(PGRST20[024]|42703|42883|42P01|storage_404)$/.test(c) || /bucket not found/i.test((e && e.message) || "")
       || (c === "23514" && /visibilite_valide/.test((e && e.message) || ""))) {
-    return "Le serveur HookDex n'est pas encore à jour : il faut installer le script n° 5 dans Supabase (voir le guide).";
+    return "Le serveur HookDex n'est pas encore à jour : il faut installer le script n° 7 dans Supabase (voir le guide).";
   }
   if (/^storage_(403|413|415)$/.test(c) || (e && e.status === 413)) {
     if (/413/.test(c) || (e && e.status === 413)) return "Photo trop lourde pour le serveur.";
@@ -15045,6 +15306,8 @@ async function commApplyCatch(c, want) {
     }
     if (!row.photo) row = (await commPatchCatch(e.id, { photo: true })) || row;
     e.ph = true;
+  } else if (catchHasPhoto(c) && !data && (row.photo || e.ph)) {
+    // v6.1 : photo absente de ce téléphone : la copie en ligne reste telle quelle
   } else if (row.photo || e.ph) {
     row = (await commPatchCatch(e.id, { photo: false })) || row;
     try { await commDeletePhotos(uid, e.id); } catch (err) {}
@@ -15176,8 +15439,13 @@ async function commSync() {
           commRegSave();
         }
         if (e.ph) {
-          const data = catchHasPhoto(c) ? await getCatchPhoto(c) : null;
-          if (!data) {
+          const aPhoto = catchHasPhoto(c);
+          const data = aPhoto ? await getCatchPhoto(c) : null;
+          if (aPhoto && !data) {
+            // v6.1 : la photo manque sur ce téléphone (mémoire vidée ?) : la copie en ligne reste, c'est elle qui
+            // peut la remettre (svgReparer). Avant, elle était effacée ici : une perte de plus.
+          } else if (!data) {
+            // tu as retiré la photo de la prise : elle est retirée aussi en ligne
             const row = await commPatchCatch(e.id, { photo: false });
             try { await commDeletePhotos(uid, e.id); } catch (err) {}
             e.ph = false; e.pfp = ""; if (row) e.st = row.statut;
@@ -15628,33 +15896,15 @@ function commOpenReport(type, id, label) {
 
 /* ---------- une photo en grand ---------- */
 async function commOpenPhoto(path) {
-  let el = document.getElementById("comm-photo");
-  if (el) el.remove();
-  el = document.createElement("div");
-  el.id = "comm-photo";
-  el.className = "comm-photo-ov";
-  el.setAttribute("role", "dialog");
-  el.setAttribute("aria-modal", "true");
-  el.setAttribute("aria-label", "Photo de la prise");
-  el.innerHTML = `<button class="round-btn" id="comm-photo-x" aria-label="Fermer la photo">${icon("close")}</button><p class="acct-wait"><span class="acct-spin" aria-hidden="true"></span>Chargement…</p>`;
-  document.body.appendChild(el);
-  armBackGuard();
-  const close = () => { const x = document.getElementById("comm-photo"); if (x) x.remove(); };
-  el.onclick = (e) => { if (e.target === el || e.target.closest("#comm-photo-x")) close(); };
+  // v6.1 : la photo en grand sait zoomer (30_zoom.js)
+  const el = pvOuvrir("Photo de la prise");
   try {
     const u = (await commPhotoUrls([path]))[path];
-    if (!document.getElementById("comm-photo")) return;
-    const w = el.querySelector(".acct-wait");
-    if (!u) { w.textContent = "Photo indisponible."; return; }
-    const img = new Image();
-    img.alt = "Photo de la prise";
-    img.onload = () => { if (w) w.remove(); };
-    img.onerror = () => { if (w) w.textContent = "Photo indisponible."; };
-    img.src = u;
-    el.appendChild(img);
+    if (!el.isConnected) return;
+    if (!u) { pvErreur(el, "Photo indisponible."); return; }
+    pvMontrer(el, u);
   } catch (e) {
-    const w = el.querySelector(".acct-wait");
-    if (w) w.textContent = commErr(e);
+    pvErreur(el, commErr(e));
   }
 }
 
@@ -17252,6 +17502,7 @@ async function commDeleteAllOnline() {
       throw new AcctError(400, "P0001", "HookDex : tu es le seul admin. Nomme un autre admin avant de supprimer ton compte.");
     }
   }
+  await svgEffacerEnLigne();
   await commRest("captures?user_id=eq." + encodeURIComponent(s.user.id), { method: "DELETE" });
   try { await acctRpc("retirer_mon_avatar"); } catch (e) {}
   try { await commCleanAvatars(null); } catch (e) {}
@@ -17269,6 +17520,7 @@ function commForgetCaches() {
 }
 function commForgetAccount(uid) {
   try { localStorage.removeItem("fdx_comm_" + uid); } catch (e) {}
+  svgOublierCompte(uid);
   commForgetCaches();
 }
 function commAccountButtons(modo, p) {
@@ -17280,6 +17532,7 @@ function commAccountButtons(modo, p) {
       <button class="comm-acct-btn" type="button" data-acct-comm="amis">👥 Mes amis${p && +p.demandes_amis ? ` · ${+p.demandes_amis} demande${+p.demandes_amis > 1 ? "s" : ""}` : ""}</button>
       <button class="comm-acct-btn" type="button" data-acct-view="notifs">🔔 Notifications${pushEtat() ? " · activées" : ""}</button>
       ${modo ? `<button class="comm-acct-btn" type="button" data-acct-comm="modo">🛡️ Modération${todo ? ` (${todo})` : ""}</button>` : ""}
+      <button class="comm-acct-btn" type="button" data-acct-view="retour">💬 Un problème ou une idée ?</button>
     </div>`;
 }
 function commBindAccount(root) {
@@ -17479,7 +17732,11 @@ async function acctServeurEtat() {
       <span>${oui(e.reveil)} Réveil automatique (pg_net)${e.reveil ? "" : " : absent, les notifications partent quand l'appli réveille la fonction"}</span>
       <span>📱 ${plurFr(+e.telephones || 0, "téléphone")} abonné${(+e.telephones || 0) > 1 ? "s" : ""} (${plurFr(+e.comptes_abonnes || 0, "compte")})</span>
       <span>📨 ${plurFr(+e.envoyees_24h || 0, "notification")} en 24 h · ${+e.en_attente || 0} en attente · dernière : ${escapeHtml(quand)}</span></div>
-    <div class="acct-etat-l"><b>🤖 Anti-robots</b><span>${e.turnstile ? "✅ Clé de site posée" : "— Pas de clé de site"}</span></div>`;
+    <div class="acct-etat-l"><b>🤖 Anti-robots</b><span>${e.turnstile ? "✅ Clé de site posée" : "— Pas de clé de site"}</span></div>
+    <div class="acct-etat-l"><b>☁️ Sauvegardes en ligne</b>${e.fichiers_octets === undefined ? "<span>— Script n° 7 pas encore installé</span>" : `
+      <span>👥 ${plurFr(+e.sauvegardes_comptes || 0, "compte")} · 📷 ${plurFr(+e.sauvegardes_photos || 0, "photo")} · ${escapeHtml(svgOctets(+e.sauvegardes_octets || 0))}</span>
+      <span>💾 Tous les fichiers du serveur : ${escapeHtml(svgOctets(+e.fichiers_octets || 0))} sur 1 Go (offre gratuite de Supabase)</span>
+      <span>📏 ${+e.sauvegarde_photos_max || 90} photos par compte au plus (sans limite pour les admins)</span>`}</div>`;
 }
 async function acctServeurEnregistrer() {
   const v = acctVal("acct-ts").trim();
@@ -17501,6 +17758,12 @@ const PUSH_TYPES = [
   ["likes", "❤️ « J'aime »", "Quelqu'un aime une de tes prises."],
   ["prises", "🎣 Prises de tes amis", "Un ami partage une nouvelle prise."],
 ];
+// v6.1 : les admins reçoivent aussi les messages des pêcheurs (« Un problème ou une idée ? »)
+const PUSH_TYPE_MSG = ["messages", "💬 Messages des pêcheurs", "Un pêcheur envoie un problème ou une idée (réservé aux admins)."];
+function pushTypes() {
+  const p = acctProfil();
+  return p && p.role === "admin" ? PUSH_TYPES.concat([PUSH_TYPE_MSG]) : PUSH_TYPES;
+}
 function pushPossible() { return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window && window.isSecureContext !== false; }
 function pushIphone() { return /iPhone|iPad|iPod/.test(navigator.userAgent || ""); }
 function pushEtat() {
@@ -17539,7 +17802,9 @@ async function pushAbonnement(cle) {
 async function pushEnregistrer(sub, types) {
   const j = sub.toJSON();
   const r = await acctRpc("push_abonner", { adresse: j.endpoint, cle_p256dh: j.keys.p256dh, cle_auth: j.keys.auth, quoi: types });
-  pushNoter({ uid: acctSession().user.id, endpoint: j.endpoint, types: (r && r.types) || types, at: Date.now() });
+  const avant = pushEtat(), t = (r && r.types) || types;
+  // msg : le choix « messages » (admins) a déjà été fait une fois sur ce téléphone (on ne le recoche plus tout seul)
+  pushNoter({ uid: acctSession().user.id, endpoint: j.endpoint, types: t, at: Date.now(), msg: (avant && avant.msg) || t.indexOf("messages") >= 0 ? 1 : 0 });
   return r;
 }
 // activer (appelé depuis un appui : Chrome demande alors l'autorisation)
@@ -17557,7 +17822,7 @@ async function pushActiver(types) {
     if (e instanceof AcctError) throw e;
     throw new AcctError(400, "push_abo", String((e && e.message) || ""));
   }
-  return pushEnregistrer(sub, types || PUSH_TYPES.map((x) => x[0]));
+  return pushEnregistrer(sub, types || pushTypes().map((x) => x[0]));
 }
 async function pushChoix(types) {
   const rg = await reglagesCharger(false);
@@ -17587,10 +17852,18 @@ async function pushVerifier() {
     if (!rg.push) return;
     const sub = await pushAbonnement(rg.push);
     if (sub.endpoint !== p.endpoint) { try { await acctRpc("push_desabonner", { adresse: p.endpoint }); } catch (e) {} }
-    await pushEnregistrer(sub, p.types || PUSH_TYPES.map((x) => x[0]));
+    await pushEnregistrer(sub, p.types || pushTypes().map((x) => x[0]));
     const q = pushEtat();
     if (q) { q.vu = Date.now(); pushNoter(q); }
   } catch (e) {}
+}
+// v6.1 : un admin dont le téléphone était abonné avant la 6.1 reçoit aussi les « messages » (une seule fois :
+// s'il les décoche ensuite, on n'y touche plus)
+async function pushAdminMessages() {
+  const p = pushEtat(), pr = acctProfil();
+  if (!p || p.msg || !pr || pr.role !== "admin" || !pushPossible() || navigator.onLine === false) return;
+  if ((p.types || []).indexOf("messages") >= 0) { p.msg = 1; pushNoter(p); return; }
+  try { await pushChoix((p.types || []).concat(["messages"])); } catch (e) {}
 }
 // réveiller la fonction d'envoi (au cas où le serveur ne le fait pas lui-même) : discret, sans réponse attendue
 let pushPingAt = 0;
@@ -17630,7 +17903,7 @@ function acctNotifsHtml() {
     const t = new Set(p.types || []);
     corps = `<div class="comm-state is-ok">✅ Activées sur ce téléphone.</div>
       <fieldset class="comm-set" id="push-types"><legend>Ce que je reçois</legend>
-        ${PUSH_TYPES.map(([k, titre, txt]) => `<label class="comm-check"><input type="checkbox" name="push-type" value="${k}"${t.has(k) ? " checked" : ""}><span><b>${titre}</b><small>${txt}</small></span></label>`).join("")}
+        ${pushTypes().map(([k, titre, txt]) => `<label class="comm-check"><input type="checkbox" name="push-type" value="${k}"${t.has(k) ? " checked" : ""}><span><b>${titre}</b><small>${txt}</small></span></label>`).join("")}
       </fieldset>
       <div class="acct-actions"><button class="small-btn" type="button" id="push-test">📨 M'envoyer un essai</button><button class="small-btn" type="button" id="push-off">🔕 Désactiver sur ce téléphone</button></div>`;
   }
@@ -17690,6 +17963,7 @@ function pushOuvrir(lien) {
   const u = String(lien || "");
   if (!acctSession()) { acctOpen("connexion", {}); return; }
   if (u === "compte") { acctOpen("notifs", {}); return; }
+  if (u === "retours") { const pr = acctProfil(); acctOpen(pr && pr.role === "admin" ? "retours" : "mes-retours", {}); return; }
   const m = /^prise:([0-9a-f-]{36})$/.exec(u);
   commUi.asub = "prises";
   commOpenTab("amis");
@@ -17893,7 +18167,7 @@ function commDefisHtml(noFriends, invite) {
   const quand = commUi.dmois ? "ce mois-là" : "pour l'instant ce mois-ci";
   let corps;
   if (vue !== "especes" && !Array.isArray(r.points)) {
-    corps = `<div class="comm-state is-wait">Le serveur HookDex n'a pas encore les points : il faut installer la dernière version du script n° 5 dans Supabase (voir le guide).</div>`;
+    corps = `<div class="comm-state is-wait">Le serveur HookDex n'a pas encore les points : il faut installer le script n° 7 dans Supabase (voir le guide).</div>`;
   } else if (vue === "points") {
     corps = defisPointsHtml(r) || `<div class="empty-hint">Aucune prise ne compte ${quand}. Partage une prise avec « 👥 Mes amis » en notant sa taille ou son poids pour ouvrir le bal !</div>`;
   } else if (vue === "gros") {
@@ -17955,6 +18229,1491 @@ function commRecentsHtml(items) {
   }).join("")}</div>`;
 }
 
+/* ---------- v6.1 · « 💬 Un problème ou une idée ? » ---------- */
+// Un pêcheur connecté écrit à l'équipe HookDex (un problème ou une idée), avec s'il le veut une capture d'écran.
+// Le message va sur le serveur HookDex (script n° 6) : seuls les admins le lisent ; chacun voit les siens et où
+// ils en sont. Les infos techniques jointes (version, navigateur, écran ouvert) sont montrées avant l'envoi.
+// Sans compte : l'adresse e-mail de HookDex.
+const RETOUR_MAX = 1000;
+const RETOUR_ECRANS = { accueil: "Accueil", journal: "Journal", dex: "Dex", communaute: "Communauté", coach: "Coach", carte: "Carte",
+  regles: "Règles", stats: "Stats", calendrier: "Calendrier", succes: "Succès" };
+const RETOUR_GENRES = { probleme: "🐞 Un problème", idee: "💡 Une idée" };
+const RETOUR_GENRES_COURTS = { probleme: "🐞 Problème", idee: "💡 Idée" };
+const RETOUR_STATUTS = { nouveau: ["Envoyé", "is-wait"], lu: ["Lu par HookDex", "is-pub"], regle: ["Réglé ✓", "is-ok"] };
+const RETOUR_STATUTS_ADMIN = { nouveau: ["Nouveau", "is-wait"], lu: ["Lu", "is-pub"], regle: ["Réglé ✓", "is-ok"] };
+let retourBrouillon = { genre: "", texte: "", capture: "", apercu: "", ecran: "" };
+let retoursAdmin = { filtre: "nouveaux", captures: {} };
+let retourAppareilMem = "";
+
+/* ---------- les infos techniques jointes au message ---------- */
+// le navigateur et le système, lus dans l'identité du navigateur (Chrome ne dit plus la vraie version d'Android
+// dans cette identité : on la demande à part, voir retourAppareilPreciser)
+function retourAppareilUa() {
+  const ua = navigator.userAgent || "";
+  const m = (re) => { const x = re.exec(ua); return x ? x[1] : ""; };
+  let nav = "";
+  if (m(/SamsungBrowser\/(\d+)/)) nav = "Samsung Internet " + m(/SamsungBrowser\/(\d+)/);
+  else if (m(/EdgA?\/(\d+)/)) nav = "Edge " + m(/EdgA?\/(\d+)/);
+  else if (m(/OPR\/(\d+)/)) nav = "Opera " + m(/OPR\/(\d+)/);
+  else if (m(/(?:Firefox|FxiOS)\/(\d+)/)) nav = "Firefox " + m(/(?:Firefox|FxiOS)\/(\d+)/);
+  else if (m(/CriOS\/(\d+)/)) nav = "Chrome " + m(/CriOS\/(\d+)/);
+  else if (m(/Chrome\/(\d+)/)) nav = "Chrome " + m(/Chrome\/(\d+)/);
+  else if (m(/Version\/(\d+)[\d.]* (?:Mobile\/\S+ )?Safari/)) nav = "Safari " + m(/Version\/(\d+)/);
+  let os = "";
+  if (/Android 10; K\)/.test(ua)) os = "Android"; // identité « réduite » de Chrome : la version d'Android n'y est plus
+  else if (m(/Android (\d+(?:\.\d+)?)/)) os = "Android " + m(/Android (\d+(?:\.\d+)?)/);
+  else if (/Android/.test(ua)) os = "Android";
+  else if (/iPhone|iPad|iPod/.test(ua)) os = (/iPad/.test(ua) ? "iPad" : "iPhone") + (m(/OS (\d+)_/) ? " iOS " + m(/OS (\d+)_/) : "");
+  else if (/Windows/.test(ua)) os = "Windows";
+  else if (/Mac OS X/.test(ua)) os = "Mac";
+  else if (/Linux|CrOS/.test(ua)) os = /CrOS/.test(ua) ? "Chromebook" : "Linux";
+  return [nav || "navigateur inconnu", os].filter(Boolean).join(" · ");
+}
+function retourInstallee() {
+  try { return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; }
+}
+function retourAppareil() {
+  return [retourAppareilMem || retourAppareilUa(), retourInstallee() ? "appli installée" : ""].filter(Boolean).join(" · ").slice(0, 120);
+}
+// la vraie version d'Android (et le nom du navigateur), quand le navigateur sait la donner
+async function retourAppareilPreciser() {
+  if (retourAppareilMem) return;
+  try {
+    const d = navigator.userAgentData;
+    if (!d || typeof d.getHighEntropyValues !== "function") return;
+    const h = await d.getHighEntropyValues(["platformVersion"]);
+    const noms = ["Samsung Internet", "Microsoft Edge", "Opera", "Google Chrome", "Chromium"];
+    const b = noms.map((n) => (d.brands || []).find((x) => x && x.brand === n)).find(Boolean);
+    const nav = b ? `${b.brand === "Google Chrome" || b.brand === "Chromium" ? "Chrome" : b.brand.replace("Microsoft ", "")} ${b.version}` : retourAppareilUa().split(" · ")[0];
+    const pf = String(h.platform || d.platform || "");
+    const v = String(h.platformVersion || "").split(".")[0];
+    const os = pf === "Android" ? "Android" + (v && v !== "0" ? " " + v : "") : pf === "macOS" ? "Mac" : pf === "Chrome OS" ? "Chromebook" : pf;
+    retourAppareilMem = [nav, os].filter(Boolean).join(" · ").slice(0, 100);
+    const el = document.getElementById("retour-infos");
+    if (el) el.textContent = retourInfosTexte();
+  } catch (e) {}
+}
+function retourEcranNom(tab) { return RETOUR_ECRANS[tab] || ""; }
+function retourInfosTexte() {
+  const e = retourEcranNom(retourBrouillon.ecran);
+  return [`HookDex ${APP_VERSION}`, retourAppareil(), e ? `écran : ${e}` : ""].filter(Boolean).join(" · ");
+}
+function retourErreur(e) {
+  return new AcctError(e && e.status !== undefined ? e.status || 400 : 400, "push_msg", commErr(e));
+}
+
+/* ---------- la capture d'écran : réduite ici (plus de données cachées) et envoyée en JPEG ---------- */
+async function retourCaptureB64(file) {
+  const img = await loadImageEl(await fileToDataUrl(file));
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  if (!w || !h) throw new Error("image illisible");
+  const enc = (max, q) => {
+    const r = Math.min(1, max / Math.max(w, h));
+    const cv = document.createElement("canvas");
+    cv.width = Math.max(1, Math.round(w * r));
+    cv.height = Math.max(1, Math.round(h * r));
+    const g = cv.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, cv.width, cv.height);
+    g.drawImage(img, 0, 0, cv.width, cv.height);
+    return (cv.toDataURL("image/jpeg", q).split(",")[1] || "");
+  };
+  let b = enc(1600, 0.8);
+  if (b.length > 380000) b = enc(1280, 0.72); // le serveur refuse au-delà de 400 000 caractères (300 Ko)
+  if (b.length > 380000) b = enc(1024, 0.62);
+  if (b.length > 380000) b = enc(800, 0.55);
+  if (!/^\/9j\//.test(b) || b.length < 200 || b.length > 400000) throw new Error("image illisible");
+  return b;
+}
+
+/* ---------- ouvrir (Paramètres, Mon compte, notification) ---------- */
+function retourOuvrir() {
+  acctOpen(acctConfigured() && acctSession() ? "retour" : "retour-sans-compte", {});
+}
+// après l'ouverture d'une fenêtre du compte
+function retourApresOuverture(view) {
+  if (view === "retour") retourBind();
+  else if (view === "mes-retours") retoursMiensCharger();
+  else if (view === "retours") retoursAdminCharger();
+}
+
+/* ---------- la fenêtre « 💬 Un problème ou une idée ? » ---------- */
+function acctRetourHtml() {
+  const b = retourBrouillon;
+  // l'écran ouvert : celui d'où l'on écrit (un brouillon commencé garde celui de son début)
+  if (!b.ecran || (!b.texte.trim() && !b.capture)) b.ecran = state.tab || "";
+  return `<h3>💬 Un problème ou une idée ?</h3>
+    <p class="acct-intro">Écris à l'équipe HookDex : un bug, quelque chose de pas clair, une idée pour l'appli… Seul l'admin de HookDex lit ton message.</p>
+    <form id="acct-form" novalidate>
+      <fieldset class="retour-genres"><legend>C'est…</legend>
+        ${Object.keys(RETOUR_GENRES).map((k) => `<label class="retour-genre"><input type="radio" name="retour-genre" value="${k}"${b.genre === k ? " checked" : ""}><span>${RETOUR_GENRES[k]}</span></label>`).join("")}
+      </fieldset>
+      <div class="field"><label for="retour-txt">Ton message</label><textarea id="retour-txt" maxlength="${RETOUR_MAX}" rows="5" placeholder="Par exemple : sur l'écran Journal, le bouton Partager ne fait rien.">${escapeHtml(b.texte)}</textarea>
+        <div class="retour-compteur" id="retour-compteur">${b.texte.length} / ${RETOUR_MAX}</div></div>
+      <div class="retour-cap"><div id="retour-cap-vue">${retourCapVueHtml()}</div><input type="file" id="retour-cap" accept="image/*" hidden></div>
+      <p class="acct-small retour-infos">Envoyé avec ton message : <span id="retour-infos">${escapeHtml(retourInfosTexte())}</span>.</p>
+      ${acctErr}
+      <button class="primary-btn" type="submit" id="acct-go">Envoyer</button>
+    </form>
+    <div class="acct-list"><button type="button" data-acct-view="mes-retours">📬 Mes messages</button></div>
+    ${acctBack("compte", "← Retour")}`;
+}
+function retourCapVueHtml() {
+  const b = retourBrouillon;
+  if (b.apercu) {
+    return `<div class="retour-cap-ok"><img src="${b.apercu}" alt="La capture d'écran jointe"><div><b>📷 Capture d'écran jointe</b><button type="button" class="acct-link" id="retour-cap-x">Retirer</button></div></div>`;
+  }
+  return `<label class="small-btn retour-cap-btn" for="retour-cap">📷 Joindre une capture d'écran <span>(facultatif)</span></label>`;
+}
+function retourCapRedraw() {
+  const v = document.getElementById("retour-cap-vue");
+  if (!v) return;
+  v.innerHTML = retourCapVueHtml();
+  retourCapBind();
+}
+function retourCapBind() {
+  const x = document.getElementById("retour-cap-x");
+  if (x) x.onclick = () => { retourBrouillon.capture = ""; retourBrouillon.apercu = ""; retourCapRedraw(); };
+}
+function retourBind() {
+  const ta = document.getElementById("retour-txt");
+  const cpt = document.getElementById("retour-compteur");
+  if (ta) ta.oninput = () => {
+    retourBrouillon.texte = ta.value.slice(0, RETOUR_MAX);
+    if (cpt) { cpt.textContent = `${ta.value.length} / ${RETOUR_MAX}`; cpt.classList.toggle("plein", ta.value.length >= RETOUR_MAX); }
+  };
+  document.querySelectorAll("input[name=retour-genre]").forEach((r) => { r.onchange = () => { if (r.checked) retourBrouillon.genre = r.value; }; });
+  const inp = document.getElementById("retour-cap");
+  if (inp) inp.onchange = async () => {
+    const f = inp.files && inp.files[0];
+    inp.value = "";
+    if (!f) return;
+    acctSay("Préparation de la capture…", true);
+    try {
+      const b64 = await retourCaptureB64(f);
+      retourBrouillon.capture = b64;
+      retourBrouillon.apercu = "data:image/jpeg;base64," + b64;
+      acctSay("");
+    } catch (e) {
+      acctSay("Image illisible : choisis une capture d'écran (PNG ou JPEG).");
+    }
+    retourCapRedraw();
+  };
+  retourCapBind();
+  retourAppareilPreciser();
+}
+async function retourEnvoyer() {
+  const b = retourBrouillon;
+  const ta = document.getElementById("retour-txt");
+  if (ta) b.texte = ta.value.slice(0, RETOUR_MAX);
+  const g = (document.querySelector("input[name=retour-genre]:checked") || {}).value || "";
+  if (!RETOUR_GENRES[g]) return acctSay("Choisis d'abord : 🐞 un problème ou 💡 une idée.");
+  b.genre = g;
+  const t = (b.texte || "").trim();
+  if (t.length < 3) return acctSay("Écris ton message (3 caractères au moins).");
+  return acctRun(async () => {
+    try {
+      await acctRpc("envoyer_retour", { genre: g, texte: t, infos: { version: APP_VERSION, appareil: retourAppareil(), ecran: retourEcranNom(b.ecran) }, capture: b.capture || null });
+    } catch (e) { throw retourErreur(e); }
+    retourBrouillon = { genre: "", texte: "", capture: "", apercu: "", ecran: "" };
+    pushPing();
+    acctOpen("mes-retours", { info: "Message envoyé ✓ Merci ! L'équipe HookDex va le lire." });
+  });
+}
+
+/* ---------- sans compte : l'adresse e-mail de HookDex ---------- */
+function acctRetourSansCompteHtml() {
+  const sujet = encodeURIComponent("HookDex : un problème ou une idée");
+  const corps = encodeURIComponent(`\n\n—\nHookDex ${APP_VERSION} · ${retourAppareil()}`);
+  return `<h3>💬 Un problème ou une idée ?</h3>
+    <p class="acct-intro">${acctConfigured() ? "Avec un compte HookDex, tu l'envoies directement depuis l'appli, avec une capture d'écran si tu veux. Sans compte, écris" : "Écris"} à l'équipe HookDex :</p>
+    <a class="primary-btn retour-mail" href="mailto:${HOOKDEX_EXPEDITEUR}?subject=${sujet}&amp;body=${corps}">✉️ ${escapeHtml(HOOKDEX_EXPEDITEUR)}</a>
+    ${acctConfigured() ? `<div class="acct-actions"><button class="small-btn" type="button" data-acct-view="connexion">Se connecter</button><button class="small-btn" type="button" data-acct-view="inscription">Créer un compte</button></div>` : ""}
+    <div class="acct-links"><button type="button" class="acct-link" data-acct-close>Fermer</button></div>`;
+}
+
+/* ---------- « 📬 Mes messages » ---------- */
+function acctMesRetoursHtml(d) {
+  return `<h3>📬 Mes messages</h3>
+    ${d && d.info ? `<p class="acct-okmsg" role="status">${escapeHtml(d.info)}</p>` : ""}
+    <div id="retours-liste" aria-live="polite"><p class="acct-wait"><span class="acct-spin" aria-hidden="true"></span>Chargement…</p></div>
+    ${acctErr}
+    <div class="acct-list"><button type="button" data-acct-view="retour">✏️ Écrire un nouveau message</button></div>
+    ${acctBack("compte", "← Retour")}`;
+}
+function retourChip(st, admin) {
+  const s = (admin ? RETOUR_STATUTS_ADMIN : RETOUR_STATUTS)[st] || (admin ? RETOUR_STATUTS_ADMIN : RETOUR_STATUTS).nouveau;
+  return `<span class="comm-chip ${s[1]}">${s[0]}</span>`;
+}
+function retourCarteMienne(x) {
+  return `<div class="comm-card retour-item">
+      <div class="retour-tete"><span class="retour-genre-t">${RETOUR_GENRES_COURTS[x.genre] || ""}</span>${retourChip(x.statut, false)}</div>
+      <p class="retour-txt">${escapeHtml(x.texte || "")}</p>
+      <div class="retour-pied"><span>${escapeHtml(commAgo(x.cree_le))}${x.capture ? " · 📷 capture jointe" : ""}</span><button type="button" class="acct-link" data-retour-suppr="${escapeHtml(x.id)}">Supprimer</button></div>
+    </div>`;
+}
+async function retoursMiensCharger() {
+  const box = document.getElementById("retours-liste");
+  if (!box) return;
+  let l;
+  try { l = await acctRpc("mes_retours"); }
+  catch (e) { if (document.getElementById("retours-liste")) box.innerHTML = `<p class="acct-err">${escapeHtml(commErr(e))}</p>`; return; }
+  if (!document.getElementById("retours-liste") || acctView !== "mes-retours") return;
+  const items = Array.isArray(l) ? l : [];
+  box.innerHTML = items.length
+    ? `<div class="retour-liste">${items.map(retourCarteMienne).join("")}</div><p class="acct-small">« Lu par HookDex » : l'équipe l'a vu. « Réglé » : c'est corrigé ou fait (ou ce sera dans la prochaine version).</p>`
+    : `<div class="comm-state">Aucun message envoyé pour l'instant.</div>`;
+  box.querySelectorAll("[data-retour-suppr]").forEach((b) => { b.onclick = () => retourSupprimerMien(b.dataset.retourSuppr); });
+}
+async function retourSupprimerMien(id) {
+  if (!confirm("Supprimer ce message ? L'équipe HookDex ne le verra plus.")) return;
+  try { await acctRpc("supprimer_mon_retour", { retour: id }); } catch (e) { acctSay(commErr(e)); return; }
+  retoursMiensCharger();
+}
+
+/* ---------- ADMIN : « 💬 Messages des pêcheurs » ---------- */
+function retoursBadge(p) {
+  const n = p ? +p.retours_nouveaux || 0 : 0;
+  return n ? ` (${n} nouveau${n > 1 ? "x" : ""})` : "";
+}
+function acctRetoursAdminHtml() {
+  const f = retoursAdmin.filtre;
+  return `<h3>💬 Messages des pêcheurs</h3>
+    <div class="chips-row retour-filtres" role="group" aria-label="Quels messages">
+      <button type="button" class="chip${f === "nouveaux" ? " active" : ""}" data-retours-filtre="nouveaux" aria-pressed="${f === "nouveaux"}">Nouveaux</button>
+      <button type="button" class="chip${f === "tous" ? " active" : ""}" data-retours-filtre="tous" aria-pressed="${f === "tous"}">Tous</button>
+    </div>
+    <div id="retours-liste" aria-live="polite"><p class="acct-wait"><span class="acct-spin" aria-hidden="true"></span>Chargement…</p></div>
+    ${acctErr}
+    <p class="acct-small">Seuls les admins voient ces messages. Ils s'effacent au bout d'un an, ou avec le compte de leur auteur.</p>
+    ${acctBack("compte", "← Retour")}`;
+}
+function retourCarteAdmin(x) {
+  const a = x.auteur || {};
+  const id = escapeHtml(x.id);
+  const tech = [x.version ? "HookDex " + x.version : "", x.appareil || "", x.ecran ? "écran : " + x.ecran : ""].filter(Boolean).join(" · ");
+  const cap = retoursAdmin.captures[x.id];
+  return `<div class="comm-card retour-item${x.statut === "nouveau" ? " is-new" : ""}" data-retour="${id}">
+      <div class="retour-auteur">${commAvatar(a, 34)}<div class="retour-qui"><b>${escapeHtml(a.pseudo || "Un pêcheur")}</b><span>${RETOUR_GENRES_COURTS[x.genre] || ""} · ${escapeHtml(commAgo(x.cree_le))}</span></div>${retourChip(x.statut, true)}</div>
+      <p class="retour-txt">${escapeHtml(x.texte || "")}</p>
+      ${tech ? `<p class="retour-tech">${escapeHtml(tech)}</p>` : ""}
+      ${x.capture ? `<div class="retour-cap-admin">${cap ? `<img src="data:image/jpeg;base64,${cap}" alt="Capture d'écran jointe par ${escapeHtml(a.pseudo || "le pêcheur")}" data-retour-zoom>` : `<button type="button" class="small-btn" data-retour-cap="${id}">📷 Voir la capture d'écran</button>`}</div>` : ""}
+      <div class="comm-modo-acts">
+        ${x.statut === "nouveau" ? `<button type="button" class="small-btn" data-retour-act="lu" data-id="${id}">✓ Lu</button>` : ""}
+        ${x.statut !== "regle" ? `<button type="button" class="small-btn ok" data-retour-act="regle" data-id="${id}">✅ Réglé</button>` : `<button type="button" class="small-btn" data-retour-act="nouveau" data-id="${id}">↩️ Pas encore réglé</button>`}
+        <button type="button" class="small-btn bad" data-retour-act="supprimer" data-id="${id}">🗑️ Supprimer</button>
+      </div>
+    </div>`;
+}
+async function retoursAdminCharger() {
+  const box = document.getElementById("retours-liste");
+  if (!box) return;
+  const root = document.getElementById("acct");
+  if (root) root.querySelectorAll("[data-retours-filtre]").forEach((b) => {
+    b.onclick = () => { retoursAdmin.filtre = b.dataset.retoursFiltre; acctOpen("retours", {}); };
+  });
+  let r;
+  try { r = await acctRpc("admin_retours", { filtre: retoursAdmin.filtre }); }
+  catch (e) { if (document.getElementById("retours-liste")) box.innerHTML = `<p class="acct-err">${escapeHtml(commErr(e))}</p>`; return; }
+  if (!document.getElementById("retours-liste") || acctView !== "retours") return;
+  const items = (r && Array.isArray(r.items)) ? r.items : [];
+  const nb = r ? +r.nouveaux || 0 : 0;
+  const n0 = document.querySelector('[data-retours-filtre="nouveaux"]');
+  if (n0) n0.textContent = nb ? `Nouveaux (${nb})` : "Nouveaux";
+  const t0 = document.querySelector('[data-retours-filtre="tous"]');
+  if (t0 && r && +r.total) t0.textContent = `Tous (${+r.total})`;
+  box.innerHTML = items.length ? `<div class="retour-liste">${items.map(retourCarteAdmin).join("")}</div>`
+    : `<div class="comm-state">${retoursAdmin.filtre === "nouveaux" ? "Aucun nouveau message. 👍" : "Aucun message pour l'instant."}</div>`;
+  commHydratePhotos(box);
+  box.querySelectorAll("[data-retour-cap]").forEach((b) => { b.onclick = () => retourVoirCapture(b.dataset.retourCap, b); });
+  box.querySelectorAll("[data-retour-act]").forEach((b) => { b.onclick = () => retourAdminAction(b.dataset.id, b.dataset.retourAct, b); });
+  box.querySelectorAll("[data-retour-zoom]").forEach((im) => { im.onclick = () => im.classList.toggle("grand"); });
+}
+async function retourVoirCapture(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = "Chargement…"; }
+  try {
+    const r = await acctRpc("admin_retour_capture", { retour: id });
+    if (r && typeof r.image === "string" && /^\/9j\/[A-Za-z0-9+/]+={0,2}$/.test(r.image)) retoursAdmin.captures[id] = r.image;
+  } catch (e) {
+    acctSay(commErr(e));
+    if (btn) { btn.disabled = false; btn.textContent = "📷 Voir la capture d'écran"; }
+    return;
+  }
+  retoursAdminCharger();
+}
+async function retourAdminAction(id, action, btn) {
+  if (action === "supprimer" && !confirm("Supprimer ce message (et sa capture d'écran) ? C'est définitif.")) return;
+  if (btn) btn.disabled = true;
+  try {
+    await acctRpc("admin_traiter_retour", { retour: id, action });
+    if (action === "supprimer") delete retoursAdmin.captures[id];
+  } catch (e) {
+    acctSay(commErr(e));
+    if (btn) btn.disabled = false;
+    return;
+  }
+  acctLoadProfil().catch(() => {});
+  retoursAdminCharger();
+}
+
+/* ===================== v6.1 · les navigateurs qui assombrissent d'office toutes les pages ===================== */
+/* Certains navigateurs (ceux intégrés aux applis qui ouvrent les liens elles-mêmes, Samsung Internet en mode sombre…)
+   assombrissent eux-mêmes chaque page. HookDex leur dit qu'il a déjà son propre thème sombre (balise color-scheme dans
+   l'en-tête) : la plupart le respectent alors. Ceux qui l'ignorent assombrissaient le thème sombre une deuxième fois
+   (capture de Ben : boutons bordeaux, jauge bleu nuit, cartes grises). On les reconnaît sans rien deviner : un carré
+   invisible qui demande « seulement le thème clair » reçoit quand même le fond sombre (« Canvas ») du navigateur.
+   Pour eux, HookDex affiche son thème clair, que ce mode sombre sait bien transformer en sombre. Partout ailleurs
+   (Chrome, Safari, Firefox, et les navigateurs qui respectent la balise), rien ne change.
+   Le test lui-même (fdxSombreForce) est dans le petit script placé juste après l'écran d'ouverture : il sert
+   aussi à donner tout de suite le thème clair à cet écran (p26.py, section 13). */
+function navAssombri() {
+  if (typeof navAssombri.v === "boolean") return navAssombri.v;
+  let v = false;
+  try { v = typeof fdxSombreForce === "function" && fdxSombreForce() === true; } catch (e) { v = false; }
+  navAssombri.v = v;
+  return v;
+}
+// le réglage du navigateur peut changer pendant que HookDex est ouvert : on revérifie au retour sur la page
+function navAssombriRevoir() {
+  const avant = navAssombri();
+  navAssombri.v = undefined;
+  if (navAssombri() !== avant && typeof render === "function") render();
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") navAssombriRevoir(); });
+if (window.matchMedia) {
+  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", navAssombriRevoir); } catch (e) {}
+}
+
+/* ===================== v6.1 · le zoom (idées de Ben n° 1, 2 et 3) ===================== */
+/* 1. Zoomer à deux doigts partout : la balise d'affichage ne l'interdit plus (en-tête, p26.py section 14). Le double
+      appui, lui, ne zoome pas (styles : touch-action) : « deux appuis = j'aime » sur une photo et les boutons tapés
+      vite marchent comme avant ; les cartes gardent leur propre zoom. Quand on change d'onglet ou qu'une fenêtre
+      s'ouvre, le zoom à deux doigts revient à la normale : la fenêtre est alors entière à l'écran.
+   2. Les photos en grand (Carnet, Communauté, modération) : pincer, double appui, glisser pour se déplacer,
+      molette sur ordinateur ; glisser vers le bas (sans zoom) ou le bouton retour pour fermer.
+   3. La taille du texte (Paramètres → Apparence : Normal, Grand, Très grand) : le petit script de l'en-tête
+      (fdxTexteMeta) la pose avant le premier affichage ; ici, le réglage et ce qui suit (téléphone tourné…). */
+
+/* ---------- 1. le zoom à deux doigts ---------- */
+// la page est-elle agrandie à deux doigts ? (la partie visible est plus étroite que la page)
+function pageZoomee() {
+  const v = window.visualViewport;
+  return !!v && v.width > 0 && v.width < document.documentElement.clientWidth * 0.98;
+}
+// revenir à la taille normale : changer d'un dix-millième l'échelle de départ de la balise d'affichage, puis la
+// remettre ; le navigateur revient alors à cette échelle (essayé dans Chrome ; ailleurs, rien ne se passe)
+function zoomRemettre() {
+  if (!pageZoomee()) return false;
+  const m = document.querySelector('meta[name="viewport"]');
+  if (!m) return false;
+  const c = m.getAttribute("content") || "";
+  const autre = /initial-scale=[\d.]+/.test(c)
+    ? c.replace(/initial-scale=([\d.]+)/, (x, v) => "initial-scale=" + Math.round((+v + 0.0001) * 1e4) / 1e4)
+    : c + ", initial-scale=1.0001";
+  m.setAttribute("content", autre);
+  m.setAttribute("content", c);
+  return true;
+}
+// un autre onglet, ou une fenêtre qui s'ouvre : on revient à la taille normale
+(function zoomSurveiller() {
+  let onglet = null, ouvert = false, prevu = 0;
+  const voir = () => {
+    prevu = 0;
+    const t = typeof state === "object" && state ? state.tab : null;
+    let o = false;
+    try { o = typeof isOverlayOpen === "function" && !!isOverlayOpen(); } catch (e) { o = false; }
+    if ((onglet !== null && t !== onglet) || (o && !ouvert)) zoomRemettre();
+    onglet = t;
+    ouvert = o;
+  };
+  try { new MutationObserver(() => { if (!prevu) prevu = requestAnimationFrame(voir); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+})();
+
+/* ---------- 2. les photos en grand, avec zoom ---------- */
+const PV_MAX = 4;      // zoom maximum (fois la taille de la photo à l'écran)
+const PV_DOUBLE = 2.5; // zoom d'un double appui
+// la fenêtre (même place que l'ancienne « photo en grand » : le bouton retour et les tests la connaissent)
+function pvOuvrir(alt) {
+  zoomRemettre();
+  let el = document.getElementById("comm-photo");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "comm-photo";
+  el.className = "comm-photo-ov pv";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", alt || "Photo");
+  el.dataset.alt = alt || "Photo";
+  el.innerHTML = `<button class="round-btn" id="comm-photo-x" type="button" aria-label="Fermer la photo">${icon("close")}</button><p class="acct-wait"><span class="acct-spin" aria-hidden="true"></span>Chargement…</p>`;
+  document.body.appendChild(el);
+  armBackGuard();
+  const x = el.querySelector("#comm-photo-x");
+  x.onclick = () => pvFermer(el);
+  // tant que la photo n'est pas là (chargement, erreur) : un appui à côté ferme, comme avant
+  el.onclick = (e) => { if (!el.classList.contains("pv-pret") && e.target === el) pvFermer(el); };
+  el.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); pvFermer(el); } });
+  try { x.focus({ preventScroll: true }); } catch (e) {}
+  return el;
+}
+function pvFermer(el) {
+  if (el && el.isConnected) el.remove();
+}
+function pvErreur(el, msg) {
+  if (!el || !el.isConnected) return;
+  let w = el.querySelector(".acct-wait");
+  if (!w) { w = document.createElement("p"); w.className = "acct-wait"; el.appendChild(w); }
+  w.textContent = msg;
+}
+function pvMontrer(el, url) {
+  if (!el || !el.isConnected) return;
+  const img = new Image();
+  img.alt = el.dataset.alt || "Photo";
+  img.draggable = false;
+  img.onload = () => {
+    const w = el.querySelector(".acct-wait");
+    if (w) w.remove();
+    if (el.isConnected) pvGestes(el, img);
+  };
+  img.onerror = () => { img.remove(); pvErreur(el, "Photo indisponible."); };
+  img.src = url;
+  el.appendChild(img);
+}
+// ouvrir une photo déjà là (adresse connue)
+function photoVoir(url, alt) {
+  const el = pvOuvrir(alt);
+  pvMontrer(el, url);
+  return el;
+}
+// les gestes sur la photo : la photo garde sa place dans la page et on la déplace / l'agrandit (transform)
+function pvGestes(el, img) {
+  const reduit = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const souris = !!(window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches);
+  const g = { s: 1, x: 0, y: 0, pts: new Map(), d: null, tap: null, bouge: false, multi: false, t0: 0, p0: null, cible: null, ferme: 0, tt: 0 };
+  // B : la photo sans zoom (l, t, w, h) et le cadre où elle s'affiche (fl, ft, fw, fh), en points de la fenêtre
+  const cadre = () => {
+    img.style.transition = "none";
+    img.style.transform = "none";
+    const r = img.getBoundingClientRect(), o = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    const pl = parseFloat(cs.paddingLeft) || 0, pr = parseFloat(cs.paddingRight) || 0, pt = parseFloat(cs.paddingTop) || 0, pb = parseFloat(cs.paddingBottom) || 0;
+    return { l: r.left - o.left, t: r.top - o.top, w: r.width || 1, h: r.height || 1, fl: pl, ft: pt, fw: el.clientWidth - pl - pr, fh: el.clientHeight - pt - pb };
+  };
+  let B = cadre();
+  const poser = (anim) => {
+    img.style.transition = anim && !reduit ? "transform .24s cubic-bezier(.2,.8,.2,1)" : "none";
+    img.style.transform = g.s === 1 && !g.x && !g.y ? "none" : `translate3d(${g.x}px, ${g.y}px, 0) scale(${g.s})`;
+    el.classList.toggle("pv-zoom", g.s > 1.01);
+    el.dataset.zoom = String(Math.round(g.s * 100) / 100);
+  };
+  // les limites : plus petite que le cadre, la photo reste au milieu ; plus grande, ses bords ne rentrent pas dans le cadre
+  const borne = (s, x, y) => {
+    const W = s * B.w, H = s * B.h;
+    const cx = B.fl + (B.fw - W) / 2 - B.l, cy = B.ft + (B.fh - H) / 2 - B.t;
+    const bx = W <= B.fw ? [cx, cx] : [B.fl + B.fw - W - B.l, B.fl - B.l];
+    const by = H <= B.fh ? [cy, cy] : [B.ft + B.fh - H - B.t, B.ft - B.t];
+    return { x: Math.min(bx[1], Math.max(bx[0], x)), y: Math.min(by[1], Math.max(by[0], y)) };
+  };
+  // agrandir jusqu'à s1 autour d'un point de la fenêtre (px, py), qui ne bouge pas
+  const zoomEn = (s1, px, py) => {
+    const u = (px - B.l - g.x) / g.s, v = (py - B.t - g.y) / g.s;
+    g.x = px - B.l - s1 * u;
+    g.y = py - B.t - s1 * v;
+    g.s = s1;
+  };
+  const caler = (anim) => {
+    if (g.s <= 1.001) { g.s = 1; g.x = 0; g.y = 0; }
+    else {
+      if (g.s > PV_MAX) zoomEn(PV_MAX, B.fl + B.fw / 2, B.ft + B.fh / 2);
+      const b = borne(g.s, g.x, g.y);
+      g.x = b.x;
+      g.y = b.y;
+    }
+    poser(anim);
+  };
+  const point = (e) => { const o = el.getBoundingClientRect(); return { x: e.clientX - o.left, y: e.clientY - o.top }; };
+  const milieu = () => {
+    const a = [...g.pts.values()];
+    return { x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2, d: Math.max(1, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)) };
+  };
+  // (re)commencer le geste avec les doigts posés : deux doigts = pincer ; un doigt = déplacer (zoomé) ou glisser pour fermer
+  const debuter = () => {
+    const a = [...g.pts.values()];
+    if (a.length >= 2) { const m = milieu(); g.d = { mode: "pince", s: g.s, x: g.x, y: g.y, cx: m.x, cy: m.y, dist: m.d }; }
+    else if (a.length === 1) g.d = { mode: g.s > 1.01 ? "deplace" : "glisse", x: g.x, y: g.y, px: a[0].x, py: a[0].y };
+    else g.d = null;
+  };
+  // l'aide, quelques secondes en bas de l'écran
+  const aide = document.createElement("p");
+  aide.className = "pv-aide";
+  aide.textContent = souris ? "Molette ou double-clic pour zoomer" : "Pince ou touche deux fois pour zoomer";
+  el.appendChild(aide);
+  el.classList.add("pv-pret");
+  poser(false);
+
+  el.addEventListener("pointerdown", (e) => {
+    if (e.target.closest && e.target.closest("button")) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    const p = point(e);
+    if (!g.pts.size) { g.bouge = false; g.multi = false; g.t0 = performance.now(); g.p0 = p; g.cible = e.target; g.ferme = 0; }
+    g.pts.set(e.pointerId, p);
+    if (g.pts.size > 1) g.multi = true;
+    aide.classList.add("pv-vu");
+    img.style.transition = "none";
+    debuter();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (!g.pts.has(e.pointerId)) return;
+    const p = point(e);
+    g.pts.set(e.pointerId, p);
+    if (g.p0 && Math.hypot(p.x - g.p0.x, p.y - g.p0.y) > 8) g.bouge = true;
+    const d = g.d;
+    if (!d) return;
+    if (d.mode === "pince" && g.pts.size >= 2) {
+      const m = milieu();
+      let s1 = d.s * m.d / d.dist;
+      if (s1 > PV_MAX) s1 = PV_MAX + (s1 - PV_MAX) * 0.25; // au-delà du maximum, ça résiste
+      if (s1 < 1) s1 = Math.max(0.6, 1 - (1 - s1) * 0.45); // en dessous de la taille normale aussi
+      // le point de la photo qui était sous les doigts reste sous les doigts
+      const u = (d.cx - B.l - d.x) / d.s, v = (d.cy - B.t - d.y) / d.s;
+      g.s = s1;
+      g.x = m.x - B.l - s1 * u;
+      g.y = m.y - B.t - s1 * v;
+      poser(false);
+    } else if (d.mode === "deplace") {
+      const rx = d.x + p.x - d.px, ry = d.y + p.y - d.py, b = borne(g.s, rx, ry);
+      g.x = b.x + (rx - b.x) * 0.35; // au-delà d'un bord, ça résiste
+      g.y = b.y + (ry - b.y) * 0.35;
+      poser(false);
+    } else if (d.mode === "glisse" && g.pts.size === 1) {
+      const dy = p.y - d.py;
+      if (g.ferme || Math.abs(dy) > 10) {
+        g.ferme = dy || 0.01;
+        g.x = 0;
+        g.y = dy;
+        poser(false);
+        el.style.backgroundColor = `rgba(0, 0, 0, ${(0.94 * Math.max(0.2, 1 - Math.abs(dy) / 360)).toFixed(3)})`;
+      }
+    }
+  });
+  const lacher = (e) => {
+    if (!g.pts.has(e.pointerId)) return;
+    g.pts.delete(e.pointerId);
+    try { el.releasePointerCapture(e.pointerId); } catch (x) {}
+    if (g.pts.size) { debuter(); return; } // il reste un doigt : le geste continue avec lui
+    const d = g.d, p = point(e), dt = performance.now() - g.t0;
+    g.d = null;
+    // glisser vers le bas (ou le haut) sans zoom : on ferme si on est allé assez loin, sinon la photo revient
+    if (d && d.mode === "glisse" && g.ferme) {
+      const dy = g.ferme, vite = Math.abs(dy) / Math.max(1, dt) > 0.6;
+      g.ferme = 0;
+      if (Math.abs(dy) > 110 || (vite && Math.abs(dy) > 40)) {
+        if (reduit) { pvFermer(el); return; }
+        img.style.transition = "transform .18s ease-in";
+        img.style.transform = `translate3d(0, ${dy > 0 ? el.clientHeight : -el.clientHeight}px, 0)`;
+        el.style.transition = "background-color .18s";
+        el.style.backgroundColor = "rgba(0, 0, 0, 0)";
+        setTimeout(() => pvFermer(el), 190);
+        return;
+      }
+      el.style.backgroundColor = "";
+      g.x = 0;
+      g.y = 0;
+      poser(true);
+      return;
+    }
+    // un appui : deux appuis rapides = zoomer là (ou revenir) ; un appui à côté de la photo = fermer (comme avant)
+    if (e.type === "pointerup" && !g.bouge && !g.multi && dt < 400) {
+      const t = performance.now();
+      if (g.tap && t - g.tap.t < 330 && Math.hypot(p.x - g.tap.x, p.y - g.tap.y) < 36) {
+        g.tap = null;
+        clearTimeout(g.tt);
+        if (g.s > 1.05) { g.s = 1; g.x = 0; g.y = 0; }
+        else zoomEn(PV_DOUBLE, p.x, p.y);
+        caler(true);
+        return;
+      }
+      g.tap = { t, x: p.x, y: p.y };
+      if (g.cible !== img && g.s <= 1.01) {
+        clearTimeout(g.tt);
+        g.tt = setTimeout(() => { if (g.tap && g.tap.t === t) pvFermer(el); }, 340);
+      }
+      return;
+    }
+    caler(true);
+  };
+  el.addEventListener("pointerup", lacher);
+  el.addEventListener("pointercancel", lacher);
+  // la molette (ordinateur) : zoomer là où est la souris
+  el.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    aide.classList.add("pv-vu");
+    const p = point(e);
+    const f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : e.ctrlKey ? 0.01 : 0.002));
+    zoomEn(Math.min(PV_MAX, Math.max(1, g.s * f)), p.x, p.y);
+    caler(false);
+  }, { passive: false });
+  // le clavier : + et − pour zoomer, 0 pour revenir (Échap ferme : voir pvOuvrir)
+  el.addEventListener("keydown", (e) => {
+    const c = [B.fl + B.fw / 2, B.ft + B.fh / 2];
+    if (e.key === "+" || e.key === "=") zoomEn(Math.min(PV_MAX, g.s * 1.5), c[0], c[1]);
+    else if (e.key === "-" || e.key === "_") zoomEn(Math.max(1, g.s / 1.5), c[0], c[1]);
+    else if (e.key === "0") { g.s = 1; g.x = 0; g.y = 0; }
+    else return;
+    e.preventDefault();
+    caler(true);
+  });
+  // téléphone tourné, fenêtre redimensionnée : on repart de la photo entière
+  const surTaille = () => {
+    if (!el.isConnected) { window.removeEventListener("resize", surTaille); return; }
+    g.s = 1; g.x = 0; g.y = 0;
+    B = cadre();
+    poser(false);
+  };
+  window.addEventListener("resize", surTaille);
+}
+// Carnet : la photo d'une prise s'ouvre en grand (elle n'était qu'un bandeau)
+function photoBoutonHtml(c) {
+  const t = photoImgTag(c);
+  return t ? `<button type="button" class="catch-photo-btn" data-photo-voir="${escapeHtml(String(c.id))}" aria-label="Voir la photo en grand">${t}</button>` : "";
+}
+document.addEventListener("click", (e) => {
+  const b = e.target && e.target.closest ? e.target.closest("[data-photo-voir]") : null;
+  if (!b) return;
+  e.preventDefault();
+  const img = b.querySelector("img"), u = img && (img.currentSrc || img.getAttribute("src"));
+  if (u) { photoVoir(u, "Photo de ta prise"); return; }
+  // la photo n'est pas encore chargée à l'écran : on va la chercher
+  const id = b.dataset.photoVoir, el = pvOuvrir("Photo de ta prise");
+  getCatchPhoto({ id, hasPhoto: true })
+    .then((data) => { if (!el.isConnected) return; if (data) pvMontrer(el, photoUrl(id, data)); else pvErreur(el, "Photo indisponible."); })
+    .catch(() => pvErreur(el, "Photo indisponible."));
+});
+
+/* ---------- 3. la taille du texte ---------- */
+let texteNonGere = false; // ce navigateur ignore la balise d'affichage (ordinateur, « version pour ordinateur »…)
+function texteOrdi() {
+  if (texteNonGere || typeof fdxTexteMeta !== "function") return true;
+  try { return matchMedia("(hover: hover) and (pointer: fine)").matches && !(navigator.maxTouchPoints > 0); } catch (e) { return false; }
+}
+function texteReglageHtml() {
+  const n = typeof fdxTexteNiveau === "function" ? fdxTexteNiveau() : 1;
+  const b = (v, lab, px) => `<button class="small-btn" type="button" data-texte="${v}" aria-pressed="${n === v}"><span class="texte-l"><span class="texte-a" style="font-size:${px}px;" aria-hidden="true">A</span><span>${lab}</span></span></button>`;
+  return `<div class="set-sub" id="texte-titre">🔠 Taille du texte</div>
+        ${texteOrdi()
+          ? `<p class="texte-note">Sur ordinateur, grossis l'appli avec <b>Ctrl</b> et <b>+</b> (et <b>Ctrl</b> et <b>−</b> pour revenir).</p>`
+          : `<div class="texte-row" role="group" aria-labelledby="texte-titre">${b(1, "Normal", 13)}${b(2, "Grand", 16)}${b(3, "Très grand", 19)}</div>
+        <p class="texte-note">Tout grossit : les textes, les boutons et les cartes. Tu peux aussi zoomer avec deux doigts, partout.</p>`}`;
+}
+function texteReglageBind() {
+  document.querySelectorAll("[data-texte]").forEach((x) => { x.onclick = () => texteChoisir(+x.dataset.texte); });
+}
+function texteChoisir(n) {
+  try { if (n > 1) localStorage.setItem("fdx_texte", String(n)); else localStorage.removeItem("fdx_texte"); } catch (e) {}
+  const lw = typeof fdxTexteMeta === "function" ? fdxTexteMeta(n) : 0;
+  render();
+  if (n > 1 && lw) {
+    // le navigateur a-t-il suivi ? (sur ordinateur, il ignore cette balise : on le dit, et on revient à Normal)
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (Math.abs(document.documentElement.clientWidth - lw) <= 2) return;
+      texteNonGere = true;
+      try { localStorage.removeItem("fdx_texte"); } catch (e) {}
+      fdxTexteMeta(1);
+      render();
+      showSnackbar("Ce navigateur ne sait pas grossir l'appli tout seul : sur ordinateur, fais Ctrl et +.", null, null, 6000);
+    }));
+  }
+}
+(function texteDemarrer() {
+  if (typeof fdxTexteMeta !== "function") return;
+  const n = fdxTexteNiveau();
+  if (n > 1) requestAnimationFrame(() => { const lw = fdxTexteMeta(n); if (lw && Math.abs(document.documentElement.clientWidth - lw) > 2) texteNonGere = true; });
+  // téléphone tourné (la largeur de l'écran change) : la taille choisie suit
+  let t = 0;
+  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { if (!texteNonGere) fdxTexteMeta(fdxTexteNiveau()); }, 150); });
+})();
+
+/* ===================== v6.1 · LA SAUVEGARDE EN LIGNE (et les photos qui ne se perdent plus) ===================== */
+// Une copie privée du carnet sur le serveur HookDex (dossier « sauvegardes » du script n° 7), que toi seul peux lire :
+//   <compte>/carnet.json                 prises, sorties, coins et réponses à Hook, au format d'une sauvegarde (sans photos)
+//   <compte>/historique/AAAA-MM-JJ.json  une copie par jour, les 7 derniers jours
+//   <compte>/photos/<prise>.jpg          les photos : 90 au plus (sans limite pour les admins) : c'est le serveur qui compte
+//   <compte>/traces/<sortie>.json        les traces GPS des sorties terminées
+// Règles de sûreté :
+//   • la copie en ligne n'est JAMAIS remplacée par un carnet où manquent des prises qu'elle contient, sauf celles
+//     que tu as supprimées toi-même : sinon HookDex s'arrête et te demande (« Les remettre » / « Je les ai supprimées ») ;
+//   • une photo en ligne n'est effacée que 7 jours après que tu as supprimé sa prise (ou retiré sa photo) ;
+//   • une photo qui manque sur le téléphone est retéléchargée toute seule (sauvegarde en ligne, puis copie de la
+//     Communauté) ; ce qui reste introuvable est signalé, avec la marche à suivre.
+const SVG_CORBEILLE = 7 * 86400000;   // délai avant d'effacer en ligne ce que tu as supprimé
+const SVG_HISTO = 7;                  // copies du jour gardées
+const SVG_PHOTOS_PASSAGE = 12, SVG_TRACES_PASSAGE = 20;
+const SVG_PHOTOS_MAX_DEFAUT = 90;
+let svgMem = null, svgBusy = false, svgAgain = false, svgTimer = null, svgPlus = false, svgRepare = null;
+let svgManque = { verifie: false, photos: 0, traces: 0 };   // ce qui manque encore sur ce téléphone, après réparation
+let stockageProtege = null;                                 // Chrome protège-t-il les données de HookDex ?
+const svgUi = { restaurer: null, couper: false, supprimees: false, occupe: "" };
+
+/* ---------- le registre (par compte) et ce qui vaut pour tous les comptes ---------- */
+function svgRegKey() { const s = acctSession(); return s ? "fdx_svg_" + s.user.id : null; }
+function svgReg() {
+  const k = svgRegKey();
+  if (!k) return null;
+  if (svgMem && svgMem.key === k) return svgMem.data;
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(k) || "null"); } catch (e) {}
+  if (!d || typeof d !== "object" || Array.isArray(d)) d = {};
+  ["ph", "tr"].forEach((f) => { if (!d[f] || typeof d[f] !== "object" || Array.isArray(d[f])) d[f] = {}; });
+  if (!Array.isArray(d.ids)) d.ids = null;   // null : jamais envoyé depuis ce téléphone
+  if (!Array.isArray(d.sids)) d.sids = null;
+  svgMem = { key: k, data: d };
+  return d;
+}
+function svgSave() { if (svgMem) lsSet(svgMem.key, JSON.stringify(svgMem.data)); }
+function svgActive() { const d = acctConfigured() ? svgReg() : null; return !!(d && d.on === true); }
+function svgJson(cle) { try { const v = JSON.parse(localStorage.getItem(cle) || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } }
+// la corbeille : ce que TU as supprimé (prises, sorties, photos retirées), noté même sans être connecté
+function svgCorbeille() {
+  const c = svgJson("fdx_svg_corbeille");
+  ["c", "s", "p"].forEach((f) => { if (!c[f] || typeof c[f] !== "object" || Array.isArray(c[f])) c[f] = {}; });
+  return c;
+}
+function svgCorbeilleSave(c) {
+  const vieux = Date.now() - 120 * 86400000;   // au-delà de 4 mois, plus rien à comparer ni à effacer
+  ["c", "s", "p"].forEach((f) => Object.keys(c[f]).forEach((k) => { if (!(c[f][k] > vieux)) delete c[f][k]; }));
+  lsSet("fdx_svg_corbeille", JSON.stringify(c));
+}
+// les photos changées (ajoutées, remplacées), notées même sans être connecté : envoyées au prochain passage
+function svgModifs() { return svgJson("fdx_svg_modifs"); }
+function svgPhotoModifiee(id) {
+  const k = String(id);
+  if (k.startsWith("trk_")) return;   // les traces partent une fois la sortie terminée
+  const m = svgModifs();
+  m[k] = Date.now();
+  const cles = Object.keys(m);
+  if (cles.length > 3000) cles.sort((a, b) => m[a] - m[b]).slice(0, cles.length - 3000).forEach((x) => delete m[x]);
+  lsSet("fdx_svg_modifs", JSON.stringify(m));
+  const corb = svgCorbeille();
+  if (corb.p[svgCle(k)]) { delete corb.p[svgCle(k)]; svgCorbeilleSave(corb); }
+  if (svgActive()) svgSchedule(15000);
+}
+// suppression demandée par toi (après le délai pour « Annuler », la prise ou la sortie n'est plus là)
+function svgNoteSuppr(ids) {
+  const corb = svgCorbeille(), t = Date.now();
+  (Array.isArray(ids) ? ids : [ids]).forEach((id) => { corb.c[String(id)] = t; });
+  svgCorbeilleSave(corb);
+  if (svgActive()) svgSchedule(20000);
+}
+function svgNoteSupprSortie(id) {
+  const corb = svgCorbeille();
+  corb.s[String(id)] = Date.now();
+  svgCorbeilleSave(corb);
+  if (svgActive()) svgSchedule(20000);
+}
+// un nom sûr pour le serveur, toujours le même pour la même prise ou sortie
+function svgCle(id) {
+  const s = String(id);
+  if (/^[A-Za-z0-9_-]{1,80}$/.test(s)) return s;
+  let a = 0x811c9dc5, b = 0x01000193;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); a = Math.imul(a ^ c, 16777619) >>> 0; b = Math.imul(b ^ c, 2246822519) >>> 0; }
+  return "x_" + a.toString(16).padStart(8, "0") + b.toString(16).padStart(8, "0") + "_" + s.length;
+}
+function svgHash(t) {
+  let a = 0x811c9dc5, b = 5381;
+  for (let i = 0; i < t.length; i++) { const c = t.charCodeAt(i); a = Math.imul(a ^ c, 16777619) >>> 0; b = (Math.imul(b, 33) + c) >>> 0; }
+  return t.length + ":" + a.toString(36) + b.toString(36);
+}
+
+/* ---------- échanges avec le dossier « sauvegardes » ---------- */
+function svgRefus(e) { return !!e && (e.status === 403 || e.code === "storage_403" || e.code === "storage_Unauthorized"); }
+function svgServeurAncien(e) {
+  const c = (e && e.code) || "", m = (e && e.message) || "";
+  return /^(PGRST20[024]|42883|42P01|storage_404|storage_Bucket not found)$/.test(c) || /bucket not found/i.test(m);
+}
+function svgErr(e) {
+  if (svgServeurAncien(e)) return "Le serveur HookDex n'est pas encore à jour : il faut installer le script n° 7 dans Supabase (voir le guide).";
+  if (e && (e.status === 413 || /413/.test(e.code || ""))) return "Un fichier est trop gros pour la sauvegarde en ligne.";
+  if (e && (e.status === 0 || e.code === "reseau")) return "Pas de réseau pour l'instant : la copie partira plus tard.";
+  return acctMsg(e);
+}
+async function svgEnvoyer(chemin, blob) {
+  return commStorage("object/sauvegardes/" + chemin, { method: "POST", body: blob, timeout: 90000,
+    headers: { "Content-Type": blob.type || "application/octet-stream", "x-upsert": "true", "cache-control": "max-age=60" } });
+}
+async function svgListe(uid, sous) {
+  const out = [], vus = new Set();
+  for (let page = 0; page < 30; page++) {
+    const r = await commStorage("object/list/sauvegardes", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prefix: uid + (sous ? "/" + sous : ""), limit: 1000, offset: page * 1000, sortBy: { column: "name", order: "asc" } }) });
+    const l = Array.isArray(r) ? r.filter((x) => x && x.name) : [];
+    const neufs = l.filter((x) => !vus.has(x.name));
+    neufs.forEach((x) => { vus.add(x.name); out.push(x); });
+    if (l.length < 1000 || !neufs.length) break;
+  }
+  return out;
+}
+// un fichier du dossier (même jeton que le reste, renouvelé s'il le faut)
+async function svgTelecharger(chemin, bucket) {
+  const go = async (tok) => {
+    const ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 60000) : null;
+    try {
+      const res = await fetch(HOOKDEX_SERVEUR.url + "/storage/v1/object/authenticated/" + (bucket || "sauvegardes") + "/" + chemin.split("/").map(encodeURIComponent).join("/"),
+        { headers: { apikey: HOOKDEX_SERVEUR.cle, Authorization: "Bearer " + tok }, cache: "no-store", credentials: "omit", signal: ctrl ? ctrl.signal : undefined });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        let d = {};
+        try { d = JSON.parse(t) || {}; } catch (e) {}
+        throw new AcctError(res.status, "storage_" + String(d.statusCode || d.error || res.status), String(d.message || d.error || ""));
+      }
+      return await res.blob();
+    } catch (e) {
+      if (e instanceof AcctError) throw e;
+      throw new AcctError(0, "reseau", "");
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  };
+  let tok = await acctToken(false);
+  if (!tok) throw new AcctError(401, "deconnecte", "");
+  try { return await go(tok); } catch (e) {
+    if (e.status !== 0 && /jwt|token/i.test(e.message || "")) {
+      tok = await acctToken(true);
+      if (!tok) throw new AcctError(401, "deconnecte", "");
+      return go(tok);
+    }
+    throw e;
+  }
+}
+async function svgLireJson(chemin) {
+  const b = await svgTelecharger(chemin);
+  const t = await b.text();
+  return JSON.parse(String(t).replace(/^﻿/, ""));
+}
+function svgBlobData(blob) {
+  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result)); r.onerror = () => reject(r.error); r.readAsDataURL(blob); });
+}
+async function svgPhotoJpeg(blob) {
+  const tete = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+  if (blob.size < 200 || tete[0] !== 0xff || tete[1] !== 0xd8) throw new Error("pas une photo");
+  return svgBlobData(blob.type === "image/jpeg" ? blob : new Blob([blob], { type: "image/jpeg" }));
+}
+// la photo réencodée sur le téléphone (1280 px, comme pour la Communauté : aucune donnée cachée, 700 Ko au plus)
+async function svgPhotoBlob(data) {
+  const img = await loadImageEl(data);
+  const enc = (max, q) => new Promise((resolve) => {
+    const r = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+    const cv = document.createElement("canvas");
+    cv.width = Math.max(1, Math.round(img.width * r));
+    cv.height = Math.max(1, Math.round(img.height * r));
+    const g = cv.getContext("2d");
+    g.fillStyle = "#000"; g.fillRect(0, 0, cv.width, cv.height);
+    g.drawImage(img, 0, 0, cv.width, cv.height);
+    cv.toBlob((b) => resolve(b), "image/jpeg", q);
+  });
+  let b = await enc(1280, 0.82);
+  if (b && b.size > 700000) b = await enc(1024, 0.72);
+  if (b && b.size > 900000) b = await enc(800, 0.62);
+  if (!b) throw new Error("photo illisible");
+  return b;
+}
+
+/* ---------- l'envoi (en arrière-plan) ---------- */
+function svgSchedule(ms) {
+  if (!svgActive()) return;
+  clearTimeout(svgTimer);
+  svgTimer = setTimeout(() => { svgTimer = null; svgSync(); }, ms === undefined ? 20000 : ms);
+}
+// le carnet tel qu'il part : les prises sans leurs photos (elles sont à part), les sorties sans leur trace
+function svgCorps() {
+  return {
+    catches: state.catches.map((c) => (c && c.photo ? Object.assign({}, c, { photo: "", hasPhoto: true }) : c)),
+    sessions: state.sessions.slice(),
+    spots: loadSpots(),
+    obs: loadObs(),
+  };
+}
+const svgIds = (l) => (Array.isArray(l) ? l : []).filter((x) => x && x.id !== undefined && x.id !== null).map((x) => String(x.id));
+async function svgEnvoyerCarnet(uid, d) {
+  const corps = svgCorps();
+  const ici = new Set(svgIds(corps.catches)), iciS = new Set(svgIds(corps.sessions));
+  const racine = await svgListe(uid, "");
+  const obj = racine.find((x) => x.name === "carnet.json");
+  const srvAt = obj ? String(obj.updated_at || obj.created_at || "") : "";
+  let enLigne = null;
+  if (obj && srvAt !== d.srvAt) {
+    // la copie en ligne a changé depuis notre dernier envoi (autre téléphone, réinstallation…) : on la lit d'abord
+    const srv = await svgLireJson(uid + "/carnet.json");
+    enLigne = { ids: svgIds(srv.catches), sids: svgIds(srv.sessions) };
+  }
+  const corb = svgCorbeille();
+  const connus = new Set([...(d.ids || []), ...(enLigne ? enLigne.ids : [])]);
+  const connusS = new Set([...(d.sids || []), ...(enLigne ? enLigne.sids : [])]);
+  const manque = [...connus].filter((id) => !ici.has(id) && !corb.c[id]);
+  const manqueS = [...connusS].filter((id) => !iciS.has(id) && !corb.s[id]);
+  if (manque.length || manqueS.length) {
+    // JAMAIS remplacer une copie plus complète : on s'arrête et on te demande
+    const neuf = !d.perte || d.perte.prises !== manque.length || d.perte.sorties !== manqueS.length;
+    d.perte = { prises: manque.length, sorties: manqueS.length, at: Date.now(), srvAt };
+    d.perteIds = manque.slice(0, 20000);
+    d.perteSids = manqueS.slice(0, 20000);
+    if (neuf) svgUi.supprimees = false;
+    svgSave();
+    return false;
+  }
+  if (d.perte) { d.perte = null; d.perteIds = null; d.perteSids = null; }
+  const texte = JSON.stringify(corps);
+  const h = svgHash(texte);
+  if (obj && srvAt === d.srvAt && h === d.h) { svgSave(); return true; } // rien de nouveau
+  const blob = new Blob([JSON.stringify(Object.assign({ app: "HookDex France", version: APP_VERSION, format: "sauvegarde-en-ligne", exportedAt: new Date().toISOString() }, corps))], { type: "application/json" });
+  await svgEnvoyer(uid + "/carnet.json", blob);
+  d.h = h; d.ids = [...ici]; d.sids = [...iciS]; d.at = Date.now();
+  // une copie par jour (les 7 derniers jours) : de quoi revenir en arrière après une erreur
+  const jour = localDateStr(new Date());
+  if (d.hist !== jour) {
+    try {
+      const vieux = (await svgListe(uid, "historique")).map((x) => x.name).filter((n) => /^\d{4}-\d{2}-\d{2}\.json$/.test(n) && n !== jour + ".json").sort();
+      const trop = vieux.slice(0, Math.max(0, vieux.length - (SVG_HISTO - 1)));
+      if (trop.length) await commStorage("object/sauvegardes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefixes: trop.map((n) => uid + "/historique/" + n) }) });
+      await svgEnvoyer(uid + "/historique/" + jour + ".json", blob);
+      d.hist = jour;
+    } catch (e) { if (!svgRefus(e)) throw e; }
+  }
+  // la date du serveur : c'est elle qui reconnaît notre propre envoi au prochain passage
+  const o2 = (await svgListe(uid, "")).find((x) => x.name === "carnet.json");
+  d.srvAt = o2 ? String(o2.updated_at || o2.created_at || "") : "";
+  svgSave();
+  return true;
+}
+async function svgEnvoyerPhotos(uid, d) {
+  const modifs = svgModifs(), corb = svgCorbeille();
+  // photos retirées par toi (la prise est là, sans photo) : à la corbeille, effacées en ligne 7 jours après
+  let corbChange = false;
+  state.catches.forEach((c) => {
+    const k = svgCle(c.id);
+    if (!catchHasPhoto(c) && d.ph[k] && !corb.p[k]) { corb.p[k] = Date.now(); corbChange = true; }
+  });
+  if (corbChange) svgCorbeilleSave(corb);
+  if (d.plein && Date.now() - (d.pleinAt || 0) < 6 * 3600000) return;   // limite atteinte : on réessaie de temps en temps
+  const liste = state.catches.filter(catchHasPhoto).slice().sort((a, b) => catchSortTs(b) - catchSortTs(a)); // les plus récentes d'abord
+  let n = 0;
+  for (const c of liste) {
+    const k = svgCle(c.id), deja = d.ph[k];
+    if (deja && !(modifs[String(c.id)] > deja)) continue;
+    if (n >= SVG_PHOTOS_PASSAGE) { svgPlus = true; break; }
+    const data = await getCatchPhoto(c);
+    if (!data) continue;   // absente de ce téléphone : rien à envoyer, et surtout rien à effacer en ligne
+    let blob;
+    try { blob = await svgPhotoBlob(data); } catch (e) { continue; }
+    try {
+      await svgEnvoyer(uid + "/photos/" + k + ".jpg", blob);
+    } catch (e) {
+      if (svgRefus(e)) { d.plein = true; d.pleinAt = Date.now(); svgSave(); try { await svgLireEtat(d); } catch (err) {} return; }
+      if (e.status === 413) { d.ph[k] = Date.now(); svgSave(); continue; }
+      throw e;
+    }
+    d.ph[k] = Date.now() + 1;
+    d.plein = false;
+    if (corb.p[k]) { delete corb.p[k]; svgCorbeilleSave(corb); }
+    n++;
+    svgSave();
+  }
+  if (n && d.info) { d.infoAt = 0; }   // relire l'état (nombre de photos) au prochain passage
+}
+async function svgEnvoyerTraces(uid, d) {
+  if (d.tplein && Date.now() - (d.tpleinAt || 0) < 6 * 3600000) return;
+  const actif = state.activeSession ? String(state.activeSession.id) : null;
+  let n = 0;
+  for (const x of state.sessions) {
+    if (!x || !x.hasTrack || String(x.id) === actif) continue;
+    const k = svgCle(x.id);
+    if (d.tr[k]) continue;
+    if (n >= SVG_TRACES_PASSAGE) { svgPlus = true; break; }
+    const pts = await loadTrack(x.id);
+    if (!pts.length) continue;   // absente de ce téléphone
+    try {
+      await svgEnvoyer(uid + "/traces/" + k + ".json", new Blob([JSON.stringify({ v: 1, pts })], { type: "application/json" }));
+    } catch (e) {
+      if (svgRefus(e)) { d.tplein = true; d.tpleinAt = Date.now(); svgSave(); return; }
+      if (e.status === 413) { d.tr[k] = -1; svgSave(); continue; }
+      throw e;
+    }
+    d.tr[k] = pts.length;
+    n++;
+    svgSave();
+  }
+}
+// la corbeille : effacée en ligne 7 jours après ta suppression (si la prise n'est pas revenue entre-temps)
+async function svgViderCorbeille(uid, d) {
+  const corb = svgCorbeille(), now = Date.now();
+  const iciC = new Set(state.catches.map((c) => String(c.id))), iciS = new Set(state.sessions.map((x) => String(x.id)));
+  const avecPhoto = new Set(state.catches.filter(catchHasPhoto).map((c) => svgCle(c.id)));
+  const effacer = [], apres = [];
+  Object.keys(corb.c).forEach((id) => {
+    if (iciC.has(id)) { delete corb.c[id]; return; }   // revenue (« Annuler », restauration)
+    if (now - corb.c[id] < SVG_CORBEILLE) return;
+    const k = svgCle(id);
+    if (d.ph[k]) { effacer.push(uid + "/photos/" + k + ".jpg"); apres.push(() => { delete d.ph[k]; }); }
+    if (!(d.ids || []).includes(id)) apres.push(() => { delete corb.c[id]; });
+  });
+  Object.keys(corb.s).forEach((id) => {
+    if (iciS.has(id)) { delete corb.s[id]; return; }
+    if (now - corb.s[id] < SVG_CORBEILLE) return;
+    const k = svgCle(id);
+    if (d.tr[k]) { effacer.push(uid + "/traces/" + k + ".json"); apres.push(() => { delete d.tr[k]; }); }
+    if (!(d.sids || []).includes(id)) apres.push(() => { delete corb.s[id]; });
+  });
+  Object.keys(corb.p).forEach((k) => {
+    if (avecPhoto.has(k)) { delete corb.p[k]; return; }   // une photo est revenue sur cette prise
+    if (now - corb.p[k] < SVG_CORBEILLE) return;
+    if (d.ph[k]) effacer.push(uid + "/photos/" + k + ".jpg");
+    apres.push(() => { delete d.ph[k]; delete corb.p[k]; });
+  });
+  if (effacer.length) {
+    for (let i = 0; i < effacer.length; i += 100) {
+      await commStorage("object/sauvegardes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefixes: effacer.slice(i, i + 100) }) });
+    }
+    d.plein = false; d.tplein = false; d.infoAt = 0;
+  }
+  apres.forEach((f) => f());
+  svgCorbeilleSave(corb);
+  svgSave();
+}
+async function svgLireEtat(d) {
+  const r = await acctRpc("ma_sauvegarde");
+  if (r && typeof r === "object") { d.info = r; d.infoAt = Date.now(); svgSave(); }
+}
+async function svgSync() {
+  if (svgBusy) { svgAgain = true; return; }
+  const s = acctSession(), d = svgReg();
+  if (!s || !d || d.on !== true || navigator.onLine === false) return;
+  svgBusy = true;
+  svgPlus = false;
+  let retry = 0;
+  svgMajUi();
+  try {
+    const uid = s.user.id;
+    await svgEnvoyerCarnet(uid, d);
+    await svgEnvoyerPhotos(uid, d);
+    await svgEnvoyerTraces(uid, d);
+    await svgViderCorbeille(uid, d);
+    if (!d.info || Date.now() - (d.infoAt || 0) > 6 * 3600000) await svgLireEtat(d);
+    d.err = "";
+    d.essai = Date.now();
+    svgSave();
+  } catch (e) {
+    if (e && (e.status === 0 || e.code === "reseau")) retry = 60000;
+    else if (e && e.code === "deconnecte") retry = 0;
+    else { d.err = svgErr(e); svgSave(); retry = 15 * 60000; }
+  } finally {
+    svgBusy = false;
+    svgMajUi();
+    if (svgAgain) { svgAgain = false; svgSchedule(1500); }
+    else if (retry) svgSchedule(retry);
+    else if (svgPlus) svgSchedule(3000);
+  }
+}
+
+/* ---------- les photos qui manquent sur ce téléphone : retéléchargées toutes seules ---------- */
+async function svgReparer() {
+  if (svgRepare) return svgRepare;
+  svgRepare = (async () => {
+    const res = { photos: 0, traces: 0 };
+    let cles;
+    try { cles = await PhotoDB.keys(); } catch (e) { return res; }   // mémoire des photos inaccessible : on ne conclut rien
+    const manquent = state.catches.filter((c) => c && c.hasPhoto && !c.photo && !cles.has(String(c.id)));
+    const actif = state.activeSession ? String(state.activeSession.id) : null;
+    const tracesManquent = state.sessions.filter((x) => x && x.hasTrack && String(x.id) !== actif && !cles.has(trackKey(x.id)));
+    const s = acctSession();
+    if (s && (manquent.length || tracesManquent.length) && navigator.onLine !== false) {
+      const uid = s.user.id, d = svgReg();
+      const remis = (c, data) => { if (d) d.ph[svgCle(c.id)] = Date.now() + 1; cachePhoto(c.id, data); forgetPhotoUrl(c.id); res.photos++; };
+      // 1. la sauvegarde en ligne (même coupée : la copie d'avant est peut-être encore là)
+      let enLigne = null;
+      if (manquent.length) { try { enLigne = new Set((await svgListe(uid, "photos")).map((x) => x.name)); } catch (e) { enLigne = null; } }
+      for (const c of manquent.slice()) {
+        const k = svgCle(c.id);
+        if (!enLigne || !enLigne.has(k + ".jpg")) continue;
+        try {
+          const data = await svgPhotoJpeg(await svgTelecharger(uid + "/photos/" + k + ".jpg"));
+          await PhotoDB.put(c.id, data);
+          if ((await PhotoDB.get(c.id)) !== data) continue;
+          remis(c, data);
+          manquent.splice(manquent.indexOf(c), 1);
+        } catch (e) { if (e && e.code === "reseau") break; }
+      }
+      // 2. la copie de la Communauté (prises partagées avec leur photo)
+      for (const c of manquent.slice()) {
+        const e = commCatchEntry(c.id);
+        if (!e || !e.id) continue;
+        try {
+          const chemin = commPhotoPath(uid, e.id, false);
+          const u = (await commPhotoUrls([chemin]))[chemin];
+          if (!u) continue;
+          const r = await fetch(u, { cache: "no-store", credentials: "omit" });
+          if (!r.ok) continue;
+          const data = await svgPhotoJpeg(await r.blob());
+          await PhotoDB.put(c.id, data);
+          if ((await PhotoDB.get(c.id)) !== data) continue;
+          remis(c, data);
+          manquent.splice(manquent.indexOf(c), 1);
+        } catch (err) { if (err && err.code === "reseau") break; }
+      }
+      // 3. les traces GPS
+      let tracesEnLigne = null;
+      if (tracesManquent.length) { try { tracesEnLigne = new Set((await svgListe(uid, "traces")).map((x) => x.name)); } catch (e) { tracesEnLigne = null; } }
+      for (const x of tracesManquent.slice()) {
+        const k = svgCle(x.id);
+        if (!tracesEnLigne || !tracesEnLigne.has(k + ".json")) continue;
+        try {
+          const v = await svgLireJson(uid + "/traces/" + k + ".json");
+          if (!v || !Array.isArray(v.pts) || v.pts.length < 2) continue;
+          await PhotoDB.put(trackKey(x.id), { v: 1, pts: v.pts });
+          if (d) d.tr[k] = v.pts.length;
+          res.traces++;
+          tracesManquent.splice(tracesManquent.indexOf(x), 1);
+        } catch (e) { if (e && e.code === "reseau") break; }
+      }
+      if (d) svgSave();
+    }
+    svgManque = { verifie: true, photos: manquent.length, traces: tracesManquent.length, at: Date.now() };
+    if (res.photos || res.traces) {
+      if (!isOverlayOpen() && !state.showForm) renderMain(); else hydratePhotos();
+      showSnackbar(`☁️ ${[res.photos ? plurFr(res.photos, "photo") + " remise" + (res.photos > 1 ? "s" : "") : "", res.traces ? plurFr(res.traces, "trace GPS") + " remise" + (res.traces > 1 ? "s" : "") : ""].filter(Boolean).join(" et ")} depuis ta sauvegarde en ligne ✓`, null, null, 6000);
+    }
+    svgMajUi();
+    return res;
+  })();
+  try { return await svgRepare; } finally { svgRepare = null; }
+}
+
+/* ---------- remettre sur le téléphone ce qui manque (rien n'est remplacé) ---------- */
+function svgFusionner(srv, avecSupprimees) {
+  const corb = svgCorbeille();
+  const out = { prises: 0, sorties: 0, coins: 0, obs: 0, ids: [], sids: [] };
+  const haveC = new Set(state.catches.map((c) => String(c.id)));
+  const prises = (Array.isArray(srv.catches) ? srv.catches : []).map((c) => {
+    const n = normalizeImportedCatch(c);
+    if (n && c && c.hasPhoto) { n.hasPhoto = true; n.photo = ""; } // la photo est à part, en ligne
+    return n;
+  }).filter((c) => c && !haveC.has(c.id) && (avecSupprimees || !corb.c[c.id]) && haveC.add(c.id));
+  const actif = state.activeSession ? String(state.activeSession.id) : null;
+  const haveS = new Set(state.sessions.map((x) => String(x.id)));
+  if (actif) haveS.add(actif);
+  const sorties = (Array.isArray(srv.sessions) ? srv.sessions : []).map(normalizeImportedSession)
+    .filter((x) => x && !haveS.has(x.id) && (avecSupprimees || !corb.s[x.id]) && haveS.add(x.id))
+    .map((x) => { const { track, ...rest } = x; return rest; });
+  if (prises.length) {
+    const nouv = [...prises, ...state.catches];
+    if (saveCatches(nouv)) { state.catches = nouv; out.prises = prises.length; out.ids = prises.map((c) => c.id); }
+  }
+  if (sorties.length) {
+    const nouv = [...sorties, ...state.sessions];
+    if (saveSessions(nouv)) { state.sessions = nouv; out.sorties = sorties.length; out.sids = sorties.map((x) => x.id); }
+  }
+  if (avecSupprimees && (out.ids.length || out.sids.length)) {
+    out.ids.forEach((id) => delete corb.c[id]);
+    out.sids.forEach((id) => delete corb.s[id]);
+    svgCorbeilleSave(corb);
+  }
+  const spotsSrv = Array.isArray(srv.spots) ? srv.spots : [];
+  if (spotsSrv.length) {
+    const have = loadSpots(), ids = new Set(have.map((x) => String(x.id))), add = [];
+    spotsSrv.forEach((x) => { if (x && x.id !== undefined && x.id !== null && !ids.has(String(x.id)) && validLatLng(x.lat, x.lng)) { ids.add(String(x.id)); add.push({ ...x, id: String(x.id), lat: +x.lat, lng: +x.lng }); } });
+    if (add.length && saveSpots([...have, ...add])) out.coins = add.length;
+  }
+  const obsSrv = Array.isArray(srv.obs) ? srv.obs : [];
+  if (obsSrv.length) {
+    const have = loadObs(), ids = new Set(have.map((o) => String(o.id))), add = [];
+    obsSrv.forEach((o) => {
+      if (!o || typeof o !== "object" || o.id === undefined || o.id === null || !o.sp || !isFinite(+o.t0) || !isFinite(+o.t1) || +o.t1 <= +o.t0 || ids.has(String(o.id))) return;
+      ids.add(String(o.id)); add.push({ ...o, id: String(o.id), t0: +o.t0, t1: +o.t1, n: isFinite(+o.n) ? +o.n : 0 });
+    });
+    if (add.length && saveObs([...add, ...have].sort((x, y) => y.t0 - x.t0))) out.obs = add.length;
+  }
+  return out;
+}
+async function svgRestaurer(chemin, avecSupprimees) {
+  const s = acctSession(), d = svgReg();
+  if (!s || !d) throw new AcctError(401, "deconnecte", "");
+  const srv = await svgLireJson(s.user.id + "/" + (chemin || "carnet.json"));
+  const out = svgFusionner(srv, !!avecSupprimees);
+  // le prochain passage relit la copie en ligne : ce téléphone l'a maintenant toute entière
+  d.perte = null; d.perteIds = null; d.perteSids = null; d.srvAt = "";
+  if (d.on !== true) d.on = true;
+  svgSave();
+  render();
+  checkNewAchievements();
+  const rep = await svgReparer();
+  svgSchedule(2500);
+  return Object.assign(out, { photosRemises: rep.photos, tracesRemises: rep.traces });
+}
+function svgResume(out) {
+  const l = [];
+  const e = (n) => (n > 1 ? "s" : "");
+  if (out.prises) l.push(`${plurFr(out.prises, "prise")} remise${e(out.prises)}`);
+  if (out.sorties) l.push(`${plurFr(out.sorties, "sortie")} remise${e(out.sorties)}`);
+  if (out.coins) l.push(`${plurFr(out.coins, "coin")} remis`);
+  if (out.photosRemises) l.push(`${plurFr(out.photosRemises, "photo")} remise${e(out.photosRemises)}`);
+  if (out.tracesRemises) l.push(`${plurFr(out.tracesRemises, "trace GPS")} remise${e(out.tracesRemises)}`);
+  return l.length ? l.join(", ") + " ✓" : "Rien ne manquait : tout était déjà sur ce téléphone ✓";
+}
+// « Je les ai supprimées exprès » : elles sortent aussi de la sauvegarde (l'historique les garde 7 jours)
+function svgConfirmerSuppressions() {
+  const d = svgReg();
+  if (!d || !d.perte) return;
+  const corb = svgCorbeille(), t = Date.now();
+  (d.perteIds || []).forEach((id) => { corb.c[id] = t; });
+  (d.perteSids || []).forEach((id) => { corb.s[id] = t; });
+  svgCorbeilleSave(corb);
+  d.perte = null; d.perteIds = null; d.perteSids = null;
+  svgSave();
+  svgUi.supprimees = false;
+  svgSchedule(300);
+  svgMajUi();
+}
+// tout effacer en ligne (couper la sauvegarde et effacer, ou suppression du compte)
+async function svgEffacerEnLigne() {
+  const s = acctSession();
+  if (!s) return;
+  const uid = s.user.id;
+  for (const sous of ["photos", "traces", "historique", ""]) {
+    let l = [];
+    try { l = await svgListe(uid, sous); } catch (e) { if (svgServeurAncien(e)) return; throw e; }
+    const noms = l.filter((x) => x.id !== null && x.id !== undefined && !/\//.test(x.name)).map((x) => uid + "/" + (sous ? sous + "/" : "") + x.name);
+    for (let i = 0; i < noms.length; i += 100) {
+      await commStorage("object/sauvegardes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prefixes: noms.slice(i, i + 100) }) });
+    }
+  }
+  const d = svgReg();
+  if (d) { d.ph = {}; d.tr = {}; d.ids = null; d.sids = null; d.h = ""; d.srvAt = ""; d.hist = ""; d.info = null; d.perte = null; svgSave(); }
+}
+function svgOublierCompte(uid) { try { localStorage.removeItem("fdx_svg_" + uid); } catch (e) {} if (svgMem && svgMem.key === "fdx_svg_" + uid) svgMem = null; }
+
+/* ---------- au démarrage et à la connexion ---------- */
+async function svgDemarrer() {
+  try { if (navigator.storage && navigator.storage.persisted) stockageProtege = await navigator.storage.persisted(); } catch (e) {}
+  if (acctSession()) await svgApresConnexion();
+  try { await svgReparer(); } catch (e) {}
+  if (svgActive()) svgSchedule(2500);
+  svgMajUi();
+}
+// connecté (au démarrage ou juste après la connexion) : si une sauvegarde en ligne existe déjà, elle reprend toute seule
+async function svgApresConnexion() {
+  const d = svgReg();
+  if (!d || d.on !== undefined || navigator.onLine === false) { if (svgActive()) svgSchedule(3000); return; }
+  try {
+    const l = await svgListe(acctSession().user.id, "");
+    if (l.some((x) => x.name === "carnet.json")) { d.on = true; svgSave(); svgSchedule(1500); }
+  } catch (e) {}
+  svgMajUi();
+}
+function svgActiver() {
+  const d = svgReg();
+  if (!d) { acctOpen("connexion", {}); return; }
+  d.on = true; d.err = ""; d.plein = false; d.tplein = false;
+  svgSave();
+  svgMajUi();
+  svgSync().then(() => { if (svgReg() && !svgReg().perte && !svgReg().err) showSnackbar("☁️ Sauvegarde en ligne activée ✓ Ton carnet part en arrière-plan.", null, null, 5000); });
+}
+
+/* ---------- ce que tu vois ---------- */
+function svgIlYA(t) {
+  if (!t) return "jamais";
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `il y a ${h} h`;
+  const j = Math.round(h / 24);
+  return j === 1 ? "hier" : `il y a ${j} jours`;
+}
+function svgPhotosNonSauvees(d) { return state.catches.filter((c) => catchHasPhoto(c) && !d.ph[svgCle(c.id)]).length; }
+function svgLimiteTexte(d) {
+  const i = d.info || {};
+  const n = typeof i.photos === "number" ? i.photos : Object.keys(d.ph).length;
+  const p = acctProfil();
+  if (i.photos_max === null || (i.photos_max === undefined && p && p.role === "admin")) return `${n} photo${n > 1 ? "s" : ""} (sans limite : admin)`;
+  return `${n}/${typeof i.photos_max === "number" ? i.photos_max : SVG_PHOTOS_MAX_DEFAUT} photos`;
+}
+function svgPerteHtml(d, ou) {
+  const p = d.perte;
+  const quoi = [p.prises ? plurFr(p.prises, "prise") : "", p.sorties ? plurFr(p.sorties, "sortie") : ""].filter(Boolean).join(" et ");
+  if (svgUi.supprimees) {
+    return `<div class="svg-box svg-alerte" data-svg-zone="${ou}"><b>Retirer ${quoi} de ta sauvegarde en ligne ?</b>
+      <p>Fais-le seulement si tu les as supprimées toi-même. Elles restent 7 jours dans l'historique de la sauvegarde.</p>
+      <div class="btn-row"><button class="small-btn svg-danger" data-svg="supprimees-oui">Oui, je les ai supprimées</button><button class="small-btn" data-svg="supprimees-non">Non, retour</button></div></div>`;
+  }
+  return `<div class="svg-box svg-alerte" data-svg-zone="${ou}"><b>☁️ Il manque ${quoi} sur ce téléphone</b>
+    <p>Ta sauvegarde en ligne ${p.prises + p.sorties > 1 ? "les a" : "l'a"} encore. Rien n'a été effacé en ligne : HookDex attend ta réponse avant de la mettre à jour.</p>
+    <div class="btn-row"><button class="small-btn svg-ok" data-svg="restaurer">↩️ Les remettre</button><button class="small-btn" data-svg="supprimees">Je les ai supprimées exprès</button></div></div>`;
+}
+function svgManqueHtml(ou) {
+  const n = svgManque.photos, t = svgManque.traces;
+  const quoi = [n ? `${plurFr(n, "photo")}` : "", t ? plurFr(t, "trace GPS") : ""].filter(Boolean).join(" et ");
+  const connecte = !!acctSession();
+  return `<div class="svg-box svg-alerte" data-svg-zone="${ou}"><b>📷 ${quoi} ${n + t > 1 ? "ont" : "a"} disparu de la mémoire du téléphone</b>
+    <p>Tes prises, elles, sont toutes là. Pour remettre ce qui manque : importe une sauvegarde faite avant (fichier .json ou .txt de « Télécharger » ou « Envoyer la sauvegarde »)${connecte ? "" : ", ou connecte-toi si tu avais la sauvegarde en ligne"}.</p>
+    <div class="btn-row"><label class="small-btn svg-ok" for="svg-import-${ou}" style="cursor:pointer;">📂 Importer une sauvegarde<input type="file" accept=".json,.txt,application/json,text/plain" id="svg-import-${ou}" data-svg-import="1" style="display:none;"></label>
+    ${connecte ? `<button class="small-btn" data-svg="reparer">☁️ Réessayer en ligne</button>` : `<button class="small-btn" data-svg="connexion">Me connecter</button>`}
+    <button class="icon-btn-flat svg-plus-tard" data-svg="manque-plus-tard">Plus tard</button></div></div>`;
+}
+// l'accueil : ce qui demande ta réponse (en premier), sinon l'invitation à activer la sauvegarde
+function svgCartesAccueil() {
+  if (!acctConfigured()) return `<div id="svg-accueil"></div>`;
+  const d = acctSession() ? svgReg() : null;
+  let h = "";
+  if (d && d.on === true && d.perte) h = svgPerteHtml(d, "accueil");
+  else if (svgManque.photos + svgManque.traces > 0 && Date.now() > (parseInt(localStorage.getItem("fdx_svg_manque_snooze") || "0", 10) || 0)) h = svgManqueHtml("accueil");
+  else if (d && d.on === undefined && Date.now() > (d.invite || 0) && state.catches.length > 0) {
+    h = `<div class="svg-box" data-svg-zone="accueil"><b>☁️ Ne perds plus jamais tes photos</b>
+      <p>Active la sauvegarde en ligne : ton carnet et tes photos sont copiés tout seuls sur le serveur HookDex, en privé. Si ton téléphone perd ses données, tu récupères tout.</p>
+      <div class="btn-row"><button class="small-btn svg-ok" data-svg="activer">Activer</button><button class="icon-btn-flat svg-plus-tard" data-svg="invite-plus-tard">Plus tard</button></div></div>`;
+  }
+  return `<div id="svg-accueil">${h}</div>`;
+}
+function svgCarteParametres() { return `<div class="card svg-card" id="svg-carte">${svgCarteInterieur()}</div>`; }
+function svgCarteInterieur() {
+  const titre = `<div class="svg-titre"><b>☁️ Sauvegarde en ligne</b>${svgBadge()}</div>`;
+  const prot = `<p class="svg-ligne">${stockageProtege ? "🛡️ Protection du téléphone : <b>activée</b> ✓ (Chrome ne vide pas la mémoire de HookDex tout seul)"
+    : `🛡️ Protection du téléphone : <b>pas activée</b>. Installe HookDex sur l'écran d'accueil et autorise ses notifications : Chrome protège alors ses données. <button class="acct-link" data-svg="proteger">Demander la protection</button>`}</p>`;
+  if (!acctConfigured()) return titre + prot;
+  const s = acctSession();
+  if (!s) {
+    return titre + `<p>Avec un compte HookDex (gratuit), ton carnet, tes photos et tes traces GPS sont copiés en ligne tout seuls, en privé. Si ton téléphone perd ses données, tu récupères tout.</p>
+      <div class="btn-row"><button class="small-btn" data-svg="inscription">Créer un compte</button><button class="small-btn" data-svg="connexion">Me connecter</button></div>` + prot;
+  }
+  const d = svgReg();
+  if (d.on !== true) {
+    return titre + `<p>Une copie privée de ton carnet (prises, sorties, coins), de tes photos (${(d.info && d.info.photos_max === null) || (acctProfil() || {}).role === "admin" ? "sans limite : admin" : `${(d.info && d.info.photos_max) || SVG_PHOTOS_MAX_DEFAUT} au plus`}) et de tes traces GPS, sur le serveur HookDex. Toi seul peux la lire.${d.on === false ? " Elle est coupée : ta copie en ligne, s'il y en a une, n'est plus mise à jour." : ""}</p>
+      <div class="btn-row"><button class="small-btn svg-ok" data-svg="activer">☁️ Activer la sauvegarde en ligne</button></div>` + prot;
+  }
+  const lignes = [];
+  if (d.perte) lignes.push(svgPerteHtml(d, "carte"));
+  if (d.err) lignes.push(`<p class="svg-ligne svg-err">⚠️ ${escapeHtml(d.err)}</p>`);
+  const nonSauvees = svgPhotosNonSauvees(d);
+  const i = d.info || {};
+  if (typeof i.photos_max === "number" && typeof i.photos === "number" && i.photos >= i.photos_max && nonSauvees > 0) {
+    lignes.push(`<p class="svg-ligne svg-err">⚠️ ${i.photos}/${i.photos_max} : ${nonSauvees > 1 ? `tes ${nonSauvees} nouvelles photos ne sont plus copiées` : "ta nouvelle photo n'est plus copiée"} en ligne. Pense à « Envoyer la sauvegarde » (Drive) de temps en temps.</p>`);
+  }
+  lignes.push(`<p class="svg-ligne">📒 ${plurFr(state.catches.length, "prise")} · 📷 ${svgLimiteTexte(d)} · 🗺️ ${plurFr(Object.values(d.tr).filter((v) => v > 0).length, "trace")}</p>`);
+  lignes.push(`<p class="svg-ligne svg-doux">Dernière copie : ${svgBusy ? "en cours…" : escapeHtml(svgIlYA(d.at))}${navigator.onLine === false ? " · pas de réseau pour l'instant" : ""}${nonSauvees && !(typeof i.photos_max === "number" && i.photos >= i.photos_max) ? ` · ${plurFr(nonSauvees, "photo")} en attente d'envoi` : ""}</p>`);
+  if (svgManque.photos + svgManque.traces > 0) lignes.push(svgManqueHtml("carte"));
+  let bas = `<div class="btn-row"><button class="small-btn" data-svg="maintenant"${svgBusy ? " disabled" : ""}>🔄 Sauvegarder maintenant</button><button class="small-btn" data-svg="restaurer-choix">↩️ Restaurer…</button><button class="small-btn" data-svg="couper">Couper</button></div>`;
+  if (svgUi.restaurer) bas += svgRestaurerHtml();
+  if (svgUi.couper) {
+    bas += `<div class="svg-box svg-alerte"><b>Couper la sauvegarde en ligne ?</b><p>Ton carnet reste sur ce téléphone. Ta copie en ligne n'est plus mise à jour (tu peux la garder, ou l'effacer tout de suite).</p>
+      <div class="btn-row"><button class="small-btn" data-svg="couper-garder">Couper (garder la copie)</button><button class="small-btn svg-danger" data-svg="couper-effacer">Couper et effacer la copie en ligne</button><button class="small-btn" data-svg="couper-non">Annuler</button></div></div>`;
+  }
+  return titre + lignes.join("") + bas + prot;
+}
+function svgBadge() {
+  const s = acctSession(), d = s ? svgReg() : null;
+  if (!d || d.on !== true) return `<span class="pill">${d && d.on === false ? "coupée" : "pas activée"}</span>`;
+  if (d.perte || d.err) return `<span class="pill warn">à vérifier</span>`;
+  return `<span class="pill ok">activée</span>`;
+}
+function svgRestaurerHtml() {
+  const r = svgUi.restaurer;
+  if (r === "charge") return `<p class="svg-ligne svg-doux">Recherche des copies en ligne…</p>`;
+  if (r && r.err) return `<p class="svg-ligne svg-err">⚠️ ${escapeHtml(r.err)}</p>`;
+  if (!r || !Array.isArray(r.copies)) return "";
+  if (!r.copies.length) return `<p class="svg-ligne">Pas encore de copie en ligne.</p>`;
+  const fmt = (j) => { const x = new Date(j + "T12:00:00"); return isNaN(x) ? j : x.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }); };
+  return `<div class="svg-box"><b>Remettre ce qui manque, depuis :</b><p>Rien n'est remplacé ni effacé sur ce téléphone : seules les prises, sorties et photos absentes reviennent (même celles que tu as supprimées).</p>
+    <div class="btn-row">${r.copies.map((c) => `<button class="small-btn" data-svg="restaurer-depuis" data-svg-chemin="${escapeHtml(c.chemin)}">${c.chemin === "carnet.json" ? "La dernière copie" : "📅 " + escapeHtml(fmt(c.jour))}</button>`).join("")}</div></div>`;
+}
+function svgMajUi() {
+  const c = document.getElementById("svg-carte");
+  if (c) c.innerHTML = svgCarteInterieur();
+  const a = document.getElementById("svg-accueil");
+  if (a && state.tab === "accueil") a.outerHTML = svgCartesAccueil();
+}
+async function svgClic(b) {
+  const quoi = b.dataset.svg;
+  const d = acctSession() ? svgReg() : null;
+  const occupe = async (fn) => {
+    if (svgUi.occupe) return;
+    svgUi.occupe = quoi;
+    b.disabled = true;
+    try { await fn(); } catch (e) { showSnackbar("⚠️ " + svgErr(e), null, null, 7000); } finally { svgUi.occupe = ""; svgMajUi(); }
+  };
+  if (quoi === "activer") { svgActiver(); return; }
+  if (quoi === "connexion") { acctOpen("connexion", {}); return; }
+  if (quoi === "inscription") { acctOpen("inscription", {}); return; }
+  if (quoi === "invite-plus-tard") { if (d) { d.invite = Date.now() + 14 * 86400000; svgSave(); } svgMajUi(); return; }
+  if (quoi === "manque-plus-tard") { try { localStorage.setItem("fdx_svg_manque_snooze", String(Date.now() + 3 * 86400000)); } catch (e) {} svgMajUi(); return; }
+  if (quoi === "proteger") {
+    let ok = false;
+    try { ok = await navigator.storage.persist(); } catch (e) {}
+    stockageProtege = ok;
+    svgMajUi();
+    if (typeof updateAppStatus === "function") updateAppStatus();
+    showSnackbar(ok ? "🛡️ Protection activée ✓" : "Chrome refuse pour l'instant : installe HookDex sur l'écran d'accueil et autorise ses notifications, puis réessaie.", null, null, 7000);
+    return;
+  }
+  if (quoi === "reparer") {
+    await occupe(async () => {
+      const r = await svgReparer();
+      if (!r.photos && !r.traces) showSnackbar(svgManque.photos + svgManque.traces ? "Ces photos ne sont pas dans ta sauvegarde en ligne : importe une sauvegarde faite avant." : "Rien ne manque ✓", null, null, 6000);
+    });
+    return;
+  }
+  if (!d) return;
+  if (quoi === "maintenant") { await occupe(async () => { await svgSync(); if (!d.err && !d.perte) showSnackbar("☁️ Sauvegarde en ligne à jour ✓", null, null, 4000); }); return; }
+  if (quoi === "restaurer") {
+    await occupe(async () => { const out = await svgRestaurer("carnet.json", false); showSnackbar("☁️ " + svgResume(out), null, null, 7000); });
+    return;
+  }
+  if (quoi === "supprimees") { svgUi.supprimees = true; svgMajUi(); return; }
+  if (quoi === "supprimees-non") { svgUi.supprimees = false; svgMajUi(); return; }
+  if (quoi === "supprimees-oui") { svgConfirmerSuppressions(); showSnackbar("C'est noté : ta sauvegarde en ligne suit ton carnet ✓", null, null, 5000); return; }
+  if (quoi === "restaurer-choix") {
+    if (svgUi.restaurer) { svgUi.restaurer = null; svgMajUi(); return; }
+    svgUi.restaurer = "charge";
+    svgMajUi();
+    try {
+      const uid = acctSession().user.id;
+      const racine = await svgListe(uid, "");
+      const copies = racine.some((x) => x.name === "carnet.json") ? [{ chemin: "carnet.json" }] : [];
+      (await svgListe(uid, "historique")).map((x) => x.name).filter((n) => /^\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort().reverse()
+        .forEach((n) => copies.push({ chemin: "historique/" + n, jour: n.slice(0, 10) }));
+      svgUi.restaurer = { copies };
+    } catch (e) { svgUi.restaurer = { err: svgErr(e) }; }
+    svgMajUi();
+    return;
+  }
+  if (quoi === "restaurer-depuis") {
+    const chemin = b.dataset.svgChemin;
+    await occupe(async () => { const out = await svgRestaurer(chemin, true); svgUi.restaurer = null; showSnackbar("☁️ " + svgResume(out), null, null, 7000); });
+    return;
+  }
+  if (quoi === "couper") { svgUi.couper = !svgUi.couper; svgMajUi(); return; }
+  if (quoi === "couper-non") { svgUi.couper = false; svgMajUi(); return; }
+  if (quoi === "couper-garder") { d.on = false; svgSave(); svgUi.couper = false; clearTimeout(svgTimer); svgMajUi(); showSnackbar("Sauvegarde en ligne coupée. Ta copie en ligne est gardée.", null, null, 5000); return; }
+  if (quoi === "couper-effacer") {
+    await occupe(async () => {
+      d.on = false; svgSave(); clearTimeout(svgTimer);
+      await svgEffacerEnLigne();
+      svgUi.couper = false;
+      showSnackbar("Sauvegarde en ligne coupée, et ta copie en ligne effacée.", null, null, 6000);
+    });
+  }
+}
+document.addEventListener("click", (e) => {
+  const b = e.target && e.target.closest ? e.target.closest("[data-svg]") : null;
+  if (!b || b.disabled) return;
+  e.preventDefault();
+  svgClic(b);
+});
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.dataset && e.target.dataset.svgImport) importData(e);
+});
+window.addEventListener("online", () => { if (svgActive()) svgSchedule(4000); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && svgActive() && svgTimer) { clearTimeout(svgTimer); svgTimer = null; svgSync(); } });
+function svgOctets(b) { return b >= 1e9 ? (b / 1e9).toFixed(2).replace(".", ",") + " Go" : b >= 1e6 ? (b / 1e6).toFixed(1).replace(".", ",") + " Mo" : Math.max(0, Math.round(b / 1e3)) + " Ko"; }
+// pour le rappel de sauvegarde : une copie en ligne récente (moins de 7 jours) vaut une sauvegarde
+function svgRecente() { const d = svgActive() ? svgReg() : null; return !!(d && d.at && Date.now() - d.at < 7 * 86400000 && !d.perte); }
+
 /* ---------- démarrage ---------- */
 render();
 if (state.activeSession) startSessionTimerLoop();
@@ -18006,6 +19765,7 @@ scheduleLearn(1500);
 setTimeout(() => { try { personalModel(); } catch (e) {} }, 900);
 setTimeout(checkShareLink, 700);
 setTimeout(acctStart, 250);
+setTimeout(svgDemarrer, 3500);
 setTimeout(warnRescued, 1500);
 window.addEventListener("hashchange", checkShareLink);
 window.__fdxBooted = true;
